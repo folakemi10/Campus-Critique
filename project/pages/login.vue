@@ -1,8 +1,46 @@
-<script setup>
-const username = ref('')
-const password = ref('')
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { FormError, FormSubmitEvent } from '@nuxt/ui/dist/runtime/types'
+
+const state = ref({
+    email: undefined,
+    password: undefined
+})
+
+const validate = (state: any): FormError[] => {
+    const errors = []
+    if (!state.email) errors.push({ path: 'email', message: 'Required' })
+    if (!state.password) errors.push({ path: 'password', message: 'Required' })
+    return errors
+}
+
+async function submit(event: FormSubmitEvent<any>) {
+    // Do something with data
+    console.log(event.data)
+    await navigateTo({
+        path: '/',
+        query: {
+            page: 0,
+        }
+    })
+}
 </script>
+
 <template>
-    <UInput v-model="username" />
-    <UInput v-model="password" />
+    <div class="flex justify-center">
+        <UForm :validate="validate" :state="state" @submit="submit">
+            <UFormGroup label="Email" name="email">
+                <UInput v-model="state.email" />
+            </UFormGroup>
+
+            <UFormGroup label="Password" name="password">
+                <UInput v-model="state.password" type="password" />
+            </UFormGroup>
+
+            <UButton type="submit">
+                Submit
+            </UButton>
+        </UForm>
+
+    </div>
 </template>
