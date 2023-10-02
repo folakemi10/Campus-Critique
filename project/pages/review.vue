@@ -1,24 +1,27 @@
 <template>
-    <h2>I want to rate a: </h2>
-    <URadio v-for="method of methods" :key="method.name" v-model="selected" v-bind="method" @click="extendForm" />
+  <v-form>
+    <v-container>
+      <h2>I want to rate a: </h2>
+      <v-radio-group v-model="inline" inline>
+        <v-radio label="Course" value="course"></v-radio>
+        <v-radio label="Professor" value="professor"></v-radio>
+      </v-radio-group>
+
+      <h2>This class is </h2>
+      <StarRating />
+    </v-container>
+  </v-form>
 </template>
 
-<script setup>
-const methods = [{
-  name: 'course',
-  value: 'course',
-  label: 'Course'
-}, {
-  name: 'professor',
-  value: 'professor',
-  label: 'Professor'
-}]
-const selected = ref('sms')
+<script >
 
-function extendForm(){
-
-    console.log("Stopping here");
-
+export default {
+  data() {
+    return {
+      column: null,
+      inline: null,
+    }
+  },
 }
 
 </script>
