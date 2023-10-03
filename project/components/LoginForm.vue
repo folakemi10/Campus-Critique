@@ -37,9 +37,7 @@ export default {
                     if (!email) return resolve('Please enter a user name.')
                     if (email === 'johnleider') return resolve('User name already taken. Please try another one.')
 
-                    navigateTo({ path: '/loggedin', params:{
-                        loggedIn: true,
-                    }})
+                    navigateTo({ path: '/loggedin'})
 
                     //return resolve(true)
                 }, 200)
