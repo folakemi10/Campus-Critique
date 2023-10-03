@@ -1,17 +1,18 @@
 <template>
     <div>
         Profile
-
     </div>
+
+    <v-card>
+        {{ text }}
+    </v-card>
 </template>
 
 <script>
 export default {
-    setup () {
-        
+    
+    props: ['text']
 
-        return {}
-    }
 }
 </script>
 

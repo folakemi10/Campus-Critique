@@ -1,5 +1,5 @@
 <template>
-    <div>
-       Card
-    </div>
+    <v-card>
+        Card
+    </v-card>>
 </template>
