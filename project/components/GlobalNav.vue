@@ -12,11 +12,11 @@
 
             <v-text-field hide-details prepend-icon="mdi-magnify" single-line></v-text-field>
 
-            <v-btn v-if="!loggedIn" to="/review">
+            <v-btn v-if="showContent" to="/review">
                 Make a Review
             </v-btn>
 
-            <v-btn v-if="loggedIn" to="/login">
+            <v-btn v-if="!showContent" to="/login">
                 Log In
             </v-btn>
 
@@ -33,10 +33,8 @@
 
 <script>
 export default {
-    props: ["loggedIn"],
-    setup(props) {
-        // setup() receives props as the first argument.
-        console.log(props.loggedIn)
+    props: {
+        showContent: Boolean,
     },
     data() {
         return {
@@ -44,7 +42,7 @@ export default {
             tabItems: [
                 'Home', 'Profile'
             ],
-          
+
         }
     },
     methods: {

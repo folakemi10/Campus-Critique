@@ -1,5 +1,5 @@
 <template>
-   <GlobalNav logged-in="true" />
+   <GlobalNav :showContent="true" />
 
   <div class="flex justify-center">
     <v-card>
