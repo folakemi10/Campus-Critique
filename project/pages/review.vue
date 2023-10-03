@@ -1,5 +1,5 @@
 <template>
-  <GlobalNav logged-in="true" />
+  <GlobalNav :showContent="true" />
   <v-form>
     <v-container>
       <h2>I want to rate a: </h2>
@@ -20,6 +20,9 @@
         <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow
           model-value=""></v-textarea>
       </v-container>
+
+    <v-btn  type="submit" block class="mt-2" text="Submit"></v-btn>
+
     </v-container>
   </v-form>
 </template>
@@ -31,10 +34,6 @@ export default {
     return {
       column: null,
       inline: null,
-
-      review: {
-        reviewText: 'sdfsdjfksjd'
-      }
     }
   },
 }

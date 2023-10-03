@@ -21,8 +21,8 @@
             </v-btn>
 
             <template v-slot:extension>
-                <v-tabs v-model="tab" align-tabs="right">
-                    <v-tab v-for="item in tabItems" :key="item" :value="item">
+                <v-tabs v-if="showContent" v-model="tab" align-tabs="right">
+                    <v-tab v-for="item in tabItems" :key="item" :value="item" >
                         {{ item }}
                     </v-tab>
                 </v-tabs>
