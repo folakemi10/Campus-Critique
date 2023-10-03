@@ -1,7 +1,6 @@
-<GlobalNav logged-in=false />
 <template>
     <div>
-        <LoginForm/>
+        Footer!
     </div>
 </template>
 
@@ -14,5 +13,3 @@
 <style lang="scss" scoped>
 
 </style>
-
-
