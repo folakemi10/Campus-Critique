@@ -1,6 +1,16 @@
 import { getQuery, readBody } from "h3";
 import { register } from "~/server/lib/auth";
 
+/**
+ * @api {post} /auth/register Register a new user
+ * @apiName Register
+ * @apiGroup Authentication
+ *
+ * @apiBody {String} email      valid email address
+ * @apibody {String} password   unhashed password
+ *
+ * @apiSuccess {Object}  _ User object (Firebase)
+ */
 export default defineEventHandler(async (event) => {
     console.log(event.path);  // log request
 
