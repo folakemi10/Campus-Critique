@@ -4,7 +4,7 @@ https://github.com/razorcx-courses/nuxt3-firestore-public/blob/108d4248c97ab4e8e
 */
 
 import { getQuery } from "h3";
-import { del } from "../lib/firestore";
+import { del } from "~/server/lib/db";
 
 export default defineEventHandler(async (event) => {
   try {
