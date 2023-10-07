@@ -1,10 +1,9 @@
 <template>
   <GlobalNav :showContent="true" />
 
-  <div class="flex justify-center">
+  <div class="flex-vertical justify-center">
 
-
-    <Card :reviews="reviews"></Card>
+    <Card v-for="(review, index) in reviews" :key="index" :review="review"></Card>
 
   </div>
 </template>
