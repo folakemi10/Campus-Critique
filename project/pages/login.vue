@@ -1,7 +1,6 @@
 <GlobalNav logged-in=false />
 <template>
    <v-container>
-        
         <LoginForm/>
    </v-container>
 </template>
