@@ -1,18 +1,13 @@
-<GlobalNav logged-in=false />
 <template>
-   <v-container>
-        <LoginForm/>
-   </v-container>
+    <div>
+        <LoginForm />
+    </div>
 </template>
 
-<script>
-    export default {
-        
-    }
+<script setup>
+   
 </script>
 
 <style lang="scss" scoped>
 
 </style>
-
-

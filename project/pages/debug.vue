@@ -35,7 +35,7 @@
 
 
 <script lang="ts">
-import { login, logout, status } from "../lib/auth";
+//import { login, logout, status } from "../lib/auth";
 
 export default {
 
