@@ -1,14 +1,12 @@
 <template>
     <v-card class="mx-auto" max-width="344" title="Log In">
-        <v-form validate-on="submit lazy" @submit.prevent="submit">
+        <v-form validate-on="submit" @submit.prevent="onSubmit">
             <v-container>
+                <v-text-field :rules="[rules.required, rules.email]" v-model="userLogin.email" color="primary" label="Email"
+                    variant="underlined" required></v-text-field>
 
-                <v-text-field v-model="email" color="primary" label="Email" variant="underlined"
-                    :rules="rules"></v-text-field>
-
-                <v-text-field v-model="password" color="primary" label="Password" placeholder="Enter your password"
-                    variant="underlined" :rules="rules"></v-text-field>
-
+                <v-text-field :rules="[rules.required]" v-model="userLogin.password" color="primary" label="Password"
+                    placeholder="Enter your password" variant="underlined" required></v-text-field>
             </v-container>
 
             <v-divider></v-divider>
@@ -16,7 +14,7 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
 
-                <v-btn color="success"  type="submit">
+                <v-btn color="success" type="submit" :loading="loading">
                     Log In
                     <v-icon icon="mdi-chevron-right" end></v-icon>
                 </v-btn>
@@ -25,43 +23,28 @@
     </v-card>
 </template>
 
+<script setup>
 
-<script>
-export default {
-    data: vm => ({
-        loading: false,
-        rules: [value => vm.checkApi(value)],
-        timeout: null,
-        email: '',
-        password: '',
-    }),
+const userLogin = ref({
+    email: "",
+    password: "",
+});
 
-    methods: {
-        async submit(event) {
-            this.loading = true
+var loading = ref(false);
 
-            const results = await event
-
-            this.loading = false
-
-            //alert(JSON.stringify(results, null, 2))
-            
-        },
-        async checkApi(email) {
-            return new Promise(resolve => {
-                clearTimeout(this.timeout)
-
-                this.timeout = setTimeout(() => {
-                    if (!email) return resolve('Please enter a user name.')
-                    if (email === 'johnleider') return resolve('User name already taken. Please try another one.')
-
-                    //return resolve(true)
-
-                    navigateTo({ path: '/loggedin' })
-                }, 200)
-            })
-        },
+const rules = ref({
+    required: (value) => !!value || "Field is required",
+    email: value => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(value) || 'Invalid e-mail.'
     },
+    passwordRules: value => !!value || "Password is required",
+});
+
+
+async function onSubmit(event) {
+    login(userLogin.value.email, userLogin.value.password);
+    await navigateTo("/");
 }
+
 </script>
-  

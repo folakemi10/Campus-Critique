@@ -2,9 +2,10 @@ import { createUserWithEmailAndPassword,
          onAuthStateChanged,
          signInWithEmailAndPassword,
          signOut,
-         User } from "firebase/auth";
+         User, 
+         getAuth} from "firebase/auth";
 
-import { auth } from "./firebase";
+import { auth } from "../lib/firebase";
 import { FirebaseError } from "firebase/app";
 
 /**
@@ -87,3 +88,20 @@ function error(e: any) {
         message: fe.message
     } 
 }
+
+export const initUser = async () => {
+    const auth = getAuth();
+    const firebaseUser = useFirebaseUser();
+    firebaseUser.value = auth.currentUser;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Auth changed: " + user.email);
+     
+      } else {
+        console.log("auth change");
+      }
+
+      firebaseUser.value = user;
+    });
+  };
