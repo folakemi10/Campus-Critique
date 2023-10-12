@@ -20,6 +20,10 @@
                 Log In
             </v-btn>
 
+            <v-btn @click="logoutRedirect" v-if="firebaseUser">
+                Log Out
+            </v-btn>
+
             <template v-slot:extension>
                 <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="right">
                     <v-tab v-for="item in tabItems" :key="item" :value="item">
@@ -38,6 +42,11 @@ const tabItems = [
     'Home', 'Profile'
 ];
 
-</script>
+const tab = ref('Home');
 
-<style lang="scss" scoped></style>
+async function logoutRedirect(){
+    logout();
+    await navigateTo("/");
+}
+
+</script>

@@ -25,6 +25,7 @@
 
 <script setup>
 
+
 const userLogin = ref({
     email: "",
     password: "",
@@ -43,8 +44,13 @@ const rules = ref({
 
 
 async function onSubmit(event) {
-    login(userLogin.value.email, userLogin.value.password);
-    await navigateTo("/");
+    await login(userLogin.value.email, userLogin.value.password);
+
+    const firebaseUser = useFirebaseUser();
+
+    if (firebaseUser) {
+        await navigateTo('/');
+    };
 }
 
 </script>
