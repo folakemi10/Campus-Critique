@@ -1,4 +1,0 @@
-<template>
-    <!-- <GlobalNav/> -->
-    <slot/>
-</template>
