@@ -16,11 +16,19 @@
   </v-container>
 </template>
   
-<script setup>
+<script>
+export default {
+  data() {
+    return {
+      allPosts: [],
+      firebaseUser: useFirebaseUser()
+    }
+  },
+  async mounted() {
+    this.allPosts = await queryEntireCollection("posts");
+  }
+}
 import { queryEntireCollection } from "~/lib/db";
 
-const firebaseUser = useFirebaseUser();
-
-const allPosts = await queryEntireCollection("posts");
 
 </script>
