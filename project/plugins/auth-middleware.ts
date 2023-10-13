@@ -1,11 +1,14 @@
+import { Auth } from "firebase/auth";
+
 export default defineNuxtPlugin(() => {
   addRouteMiddleware("auth", (to, from) => {
-    const { $auth } = useNuxtApp();
+    const nuxtApp = useNuxtApp();
+    const auth = nuxtApp.$auth as Auth | null;
 
-    if ($auth?.currentUser?.uid && to.path !== '/admin') {
+    if (auth?.currentUser?.uid && to.path !== '/admin') {
       return navigateTo("/");
     }
-    else if (!$auth?.currentUser?.uid && to.path !== '/'){
+    else if (!auth?.currentUser?.uid && to.path !== '/'){
         return navigateTo('/')  
       }
       return
