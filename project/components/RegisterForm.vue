@@ -33,6 +33,9 @@
 </template>
 
 <script setup lang="ts">
+import { User } from "firebase/auth";
+import { set } from "~/lib/db";
+
 const userInformation = ref({
     first: '',
     last: '',
@@ -42,22 +45,34 @@ const userInformation = ref({
 })
 
 async function onSubmit(event: any) {
-    await register(userInformation.value.email, userInformation.value.password);
+    const registerRes = await register(userInformation.value.email, userInformation.value.password);
+
 
     const firebaseUser = useFirebaseUser();
 
     if (firebaseUser.value !== null) {
+        addUser(firebaseUser.value, userInformation.value);
         await navigateTo("/");
     } else {
         console.log(firebaseUser.value);
     }
 }
 
+async function addUser(firebaseUser: User, userInformation: any) {
+    await set("users",
+        {
+            uid: firebaseUser.uid,
+            firstname: userInformation.first,
+            lastname: userInformation.last,
+            email: userInformation.email,
+        })
+}
+
 
 const rules = ref({
-    required: [(value: string) => !!value || "Field is required"], 
+    required: [(value: string) => !!value || "Field is required"],
     email: [
-        (value: string) => !!value || "Email is required", 
+        (value: string) => !!value || "Email is required",
         (value: string) => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return pattern.test(value) || 'Invalid e-mail.'
