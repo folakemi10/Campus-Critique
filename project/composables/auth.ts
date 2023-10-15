@@ -17,7 +17,7 @@ import { FirebaseError } from "firebase/app";
  * @returns User if success, error if fail
  */
 export async function login(email: string, password: string) {
-  console.log("Login");
+  //console.log("Login");
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,

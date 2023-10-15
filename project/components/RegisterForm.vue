@@ -1,17 +1,17 @@
 <template>
     <v-card class="mx-auto" max-width="344" title="User Registration">
-        <v-form @submit.prevent="submit">
+        <v-form @submit.prevent="onSubmit">
             <v-container>
-                <v-text-field v-model="userInformation.first" color="primary" label="First name"
+                <v-text-field v-model="userInformation.first" :rules="rules.required" color="primary" label="First name"
                     variant="underlined"></v-text-field>
 
-                <v-text-field v-model="userInformation.last" color="primary" label="Last name"
+                <v-text-field v-model="userInformation.last" :rules="rules.required" color="primary" label="Last name"
                     variant="underlined"></v-text-field>
 
-                <v-text-field v-model="userInformation.email" color="primary" label="Email"
+                <v-text-field v-model="userInformation.email" :rules="rules.email" color="primary" label="Email"
                     variant="underlined"></v-text-field>
 
-                <v-text-field v-model="userInformation.password" color="primary" label="Password"
+                <v-text-field v-model="userInformation.password" :rules="rules.password" color="primary" label="Password"
                     placeholder="Enter your password" variant="underlined"></v-text-field>
 
                 <v-checkbox v-model="userInformation.terms" color="secondary"
@@ -41,9 +41,30 @@ const userInformation = ref({
     terms: false,
 })
 
-function submit(event: any) {
-    register(userInformation.value.email, userInformation.value.password);
+async function onSubmit(event: any) {
+    await register(userInformation.value.email, userInformation.value.password);
 
-    navigateTo('/');
+    const firebaseUser = useFirebaseUser();
+
+    if (firebaseUser.value !== null) {
+        await navigateTo("/");
+    } else {
+        console.log(firebaseUser.value);
+    }
 }
+
+
+const rules = ref({
+    required: [(value: string) => !!value || "Field is required"], 
+    email: [
+        (value: string) => !!value || "Email is required", 
+        (value: string) => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return pattern.test(value) || 'Invalid e-mail.'
+        }
+    ],
+    password: [(value: string) => !!value || "Password is required", (value: string) => (value && value.length >= 6) || 'Password must be 6 or more characters',],
+});
+
+
 </script>

@@ -45,12 +45,12 @@ const rules = ref({
 
 async function onSubmit(event) {
     await login(userLogin.value.email, userLogin.value.password);
-
     const firebaseUser = useFirebaseUser();
 
-    if (firebaseUser) {
-        await navigateTo('/');
-    };
+    if (firebaseUser.value !== null) {
+        await navigateTo("/");
+    } else {
+        console.log(firebaseUser.value);
+    }
 }
-
 </script>
