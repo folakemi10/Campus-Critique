@@ -12,7 +12,8 @@
 
             <v-text-field v-if="firebaseUser" hide-details prepend-icon="mdi-magnify" single-line></v-text-field>
 
-            <v-btn v-if="firebaseUser" to="/review">
+            <v-btn v-if="firebaseUser" to="/review" class="text-none text-subtitle-1" color="#5865f2" size="small"
+                variant="flat">
                 Make a Review
             </v-btn>
 
@@ -44,16 +45,16 @@ const tabItems = [
 
 const tab = ref('Home');
 
-async function logoutRedirect(){
+async function logoutRedirect() {
     logout();
     await navigateTo("/");
 }
 
 function onTabClick(tab) {
-  if (tab === 'Home') {
-    navigateTo('/');
-  } else if (tab === 'Profile') {
-    navigateTo('/profile'); 
-  }
+    if (tab === 'Home') {
+        navigateTo('/');
+    } else if (tab === 'Profile') {
+        navigateTo('/profile');
+    }
 }
 </script>
