@@ -26,7 +26,7 @@
 
             <template v-slot:extension>
                 <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="right">
-                    <v-tab v-for="item in tabItems" :key="item" :value="item">
+                    <v-tab v-for="item in tabItems" :key="item" :value="item" @click="onTabClick(item)">
                         {{ item }}
                     </v-tab>
                 </v-tabs>
@@ -49,4 +49,11 @@ async function logoutRedirect(){
     await navigateTo("/");
 }
 
+function onTabClick(tab) {
+  if (tab === 'Home') {
+    navigateTo('/');
+  } else if (tab === 'Profile') {
+    navigateTo('/profile'); 
+  }
+}
 </script>
