@@ -45,7 +45,7 @@ const userInformation = ref({
 })
 
 async function onSubmit(event: any) {
-    const registerRes = await register(userInformation.value.email, userInformation.value.password);
+    await register(userInformation.value.email, userInformation.value.password);
 
 
     const firebaseUser = useFirebaseUser();
