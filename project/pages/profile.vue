@@ -33,7 +33,7 @@ const userName = ref();
 
 
 onMounted(async () => {
-    console.log('Entering onMounted hook');
+    //console.log('Entering onMounted hook');
 
     if (userId) {
         allPosts.value = await queryCollectionByField("posts", "uid", userId);
@@ -41,7 +41,7 @@ onMounted(async () => {
         console.log('userId does not exist');
     }
 
-    console.log('Exiting onMounted hook');
+   // console.log('Exiting onMounted hook');
 });
 
 const usersRef = collection(db, "users");

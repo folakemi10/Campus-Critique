@@ -8,17 +8,24 @@
     <v-btn to="/register">
       Get Started
     </v-btn>
-    <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected" variant="outlined" return-object></v-autocomplete>
+    <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected"
+      variant="outlined" return-object></v-autocomplete>
   </v-container>
 
   <v-container v-if="firebaseUser" class="flex-vertical justify-center">
+    <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected"
+      variant="outlined" return-object></v-autocomplete>
+      
     <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
   </v-container>
 </template>
   
 <script setup lang="ts">
 
+import { useRouter } from 'vue-router';
 import { queryEntireCollection } from "~/lib/db";
+
+const router = useRouter();
 
 const firebaseUser = useFirebaseUser();
 const allPosts = ref();
@@ -38,7 +45,13 @@ onMounted(async () => {
 
 // watch works directly on a ref
 watch(selected, async () => {
-  await navigateTo("details/" + selected.value.id);
+  await navigateTo({
+    path: '/details/',
+    query: {
+      id: selected.value.id,
+    },
+    replace: true,
+  })
 })
 
 
