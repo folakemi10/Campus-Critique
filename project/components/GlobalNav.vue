@@ -51,9 +51,9 @@ async function logoutRedirect(){
 
 function onTabClick(tab) {
   if (tab === 'Home') {
-    navigateTo('/index');
+    navigateTo('/');
   } else if (tab === 'Profile') {
-    navigateTo('/profile'); // Update this with the actual profile route
+    navigateTo('/profile'); 
   }
 }
 </script>
