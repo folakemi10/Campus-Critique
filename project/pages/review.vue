@@ -13,14 +13,14 @@
       <div v-if="revealForm">
         <v-card class="m-6" v-if="formType == 'course'">
           <v-card-title> Which course are you reviewing? </v-card-title>
-          <v-autocomplete label="Courses" v-model="review.reviewedObject" :rules="rules.required"
-            :items="allCourses"></v-autocomplete>
+          <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+            return-object></v-autocomplete>
         </v-card>
 
         <v-card class="m-6" v-if="formType == 'professor'">
           <v-card-title>Which professor are you reviewing? </v-card-title>
-          <v-autocomplete label="Professors" v-model="review.reviewedObject" :rules="rules.required"
-            :items="allProfessors"></v-autocomplete>
+          <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+            item-text="firstname" item-value="id" return-object></v-autocomplete>
         </v-card>
 
         <v-card class="m-6">
@@ -48,7 +48,7 @@ import { add, queryEntireCollection, set } from "~/lib/db";
 
 //getting prof and class data from db
 const allCourses = ref();
-const allProfessors:Ref<string[]> = ref([]);
+const allProfessors : Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();
@@ -57,24 +57,27 @@ const valid = ref();
 
 onMounted(async () => {
   allCourses.value = await queryEntireCollection('classes');
-  const profData = await queryEntireCollection('profs');
+  const professorsRef = await queryEntireCollection('profs');
 
-  profData.forEach((doc:any) => {
-    // doc.data() is never undefined for query doc snapshots
-    //allProfessors.value;
-    allProfessors.value.push(doc.firstname + " " + doc.lastname);
-});
+  professorsRef.forEach((doc: any) => {
+    const title = doc.firstname + " " + doc.lastname;
+    doc = { ...doc, title };
+
+    allProfessors.value.push(doc);
+  });
 }
 );
 
 
 
 watch(selectedClass, async () => {
-  console.log(selectedClass);
+  review.value.reviewedObject = selectedClass.value.id
+  console.log(review.value);
 })
 
 watch(selectedProf, async () => {
-  console.log(selectedClass);
+  review.value.reviewedObject = selectedProf.value.id
+  console.log(review.value);
 })
 
 
@@ -95,7 +98,7 @@ async function onSubmit() {
   if (valid.value) {
     await add("posts", review.value);
     await navigateTo('/');
-  }else{
+  } else {
     alert("All fields required!");
   }
 }
