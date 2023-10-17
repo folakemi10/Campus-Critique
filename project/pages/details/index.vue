@@ -20,8 +20,6 @@ const firebaseUser = useFirebaseUser();
 const specificPosts = ref();
 const currentDetail = ref();
 
-console.log("rerendering");
-
 
 onMounted(async () => {
   specificPosts.value = await queryCollectionByField('posts', 'reviewedObject', reviewedObjectId);
