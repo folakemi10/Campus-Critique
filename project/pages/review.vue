@@ -1,52 +1,88 @@
 <template>
   <GlobalNav />
-  <v-form @submit.prevent="onSubmit">
-    <v-card class="m-6">
-      <v-card-title>I want to rate a: </v-card-title>
-      <v-radio-group v-model="typeSelection" inline @input="onChange()">
-        <v-radio label="Course" value="course"></v-radio>
-        <v-radio label="Professor" value="professor"></v-radio>
-      </v-radio-group>
-    </v-card>
-
-    <div v-if="revealForm">
-      <v-card class="m-6" v-if="formType == 'course'">
-        <v-card-title> Which course are you reviewing? </v-card-title>
-        <v-autocomplete label="Courses" v-model="review.reviewedObject"
-          :items="['CSE131: Introduction to Computer Science', 'CSE204A: Introduction to Web Development', 'Class3', 'Class4', 'Class5', 'Class6']"></v-autocomplete>
-      </v-card>
-
-      <v-card class="m-6" v-if="formType == 'professor'">
-        <v-card-title>Which professor are you reviewing? </v-card-title>
-        <v-autocomplete label="Professors" v-model="review.reviewedObject"
-          :items="['John Doe', 'John Doe', 'John Doe', 'John Doe', 'John Doe', 'John Doe']"></v-autocomplete>
-      </v-card>
-
+  <v-container>
+    <v-form @submit.prevent="onSubmit" v-model="valid">
       <v-card class="m-6">
-        <v-rating hover v-model="review.rating"></v-rating>
+        <v-card-title>I want to rate a: </v-card-title>
+        <v-radio-group v-model="typeSelection" inline @input="onChange()" :rules="rules.required">
+          <v-radio label="Course" value="course"></v-radio>
+          <v-radio label="Professor" value="professor"></v-radio>
+        </v-radio-group>
       </v-card>
 
-      <v-card class="m-6">
-        <v-card-title>Write a Review: </v-card-title>
-        <v-container fluid>
-          <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow model-value=""
-            v-model="review.textReview"></v-textarea>
-        </v-container>
-      </v-card>
+      <div v-if="revealForm">
+        <v-card class="m-6" v-if="formType == 'course'">
+          <v-card-title> Which course are you reviewing? </v-card-title>
+          <v-autocomplete label="Courses" v-model="review.reviewedObject" :rules="rules.required"
+            :items="allCourses"></v-autocomplete>
+        </v-card>
 
-      <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+        <v-card class="m-6" v-if="formType == 'professor'">
+          <v-card-title>Which professor are you reviewing? </v-card-title>
+          <v-autocomplete label="Professors" v-model="review.reviewedObject" :rules="rules.required"
+            :items="allProfessors"></v-autocomplete>
+        </v-card>
 
-    </div>
-  </v-form>
+        <v-card class="m-6">
+          <v-card-title>How would you rate this class or professor? </v-card-title>
+          <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
+        </v-card>
+
+        <v-card class="m-6">
+          <v-card-title>Write a Review: </v-card-title>
+          <v-container fluid>
+            <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
+              v-model="review.textReview"></v-textarea>
+          </v-container>
+        </v-card>
+
+        <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+
+      </div>
+    </v-form>
+  </v-container>
 </template>
 
-<script setup>
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "~/lib/firebase";
-import { add, set } from "~/lib/db";
+<script setup lang="ts">
+import { add, queryEntireCollection, set } from "~/lib/db";
 
+//getting prof and class data from db
+const allCourses = ref();
+const allProfessors:Ref<string[]> = ref([]);
+
+const selectedClass = ref();
+const selectedProf = ref();
+
+const valid = ref();
+
+onMounted(async () => {
+  allCourses.value = await queryEntireCollection('classes');
+  const profData = await queryEntireCollection('profs');
+
+  profData.forEach((doc:any) => {
+    // doc.data() is never undefined for query doc snapshots
+    //allProfessors.value;
+    allProfessors.value.push(doc.firstname + " " + doc.lastname);
+});
+}
+);
+
+
+
+watch(selectedClass, async () => {
+  console.log(selectedClass);
+})
+
+watch(selectedProf, async () => {
+  console.log(selectedClass);
+})
+
+
+
+
+//check user auth + userId
 const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value.uid;
+const userId = firebaseUser.value?.uid;
 
 const review = ref({
   uid: userId,
@@ -56,12 +92,17 @@ const review = ref({
 })
 
 async function onSubmit() {
-  console.log(review.value);
-  await add("posts", review.value);
-
-  await navigateTo('/');
-
+  if (valid.value) {
+    await add("posts", review.value);
+    await navigateTo('/');
+  }else{
+    alert("All fields required!");
+  }
 }
+
+const rules = ref({
+  required: [(value: string) => !!value || "This question is required"],
+});
 
 let revealForm = ref(false);
 let formType = ref('');
@@ -89,6 +130,5 @@ definePageMeta({
   },
 });
 
-</script>
 
-<style lang="scss" scoped></style>
+</script>
