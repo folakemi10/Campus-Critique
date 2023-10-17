@@ -63,16 +63,6 @@ async function onSubmit() {
 
 }
 
-definePageMeta({
-  middleware: function (to, from) {
-    const user = useFirebaseUser();
-
-    if (!user.value) {
-      return navigateTo('/');
-    }
-  },
-});
-
 let revealForm = ref(false);
 let formType = ref('');
 
@@ -88,6 +78,16 @@ function onChange() {
   }
 
 }
+
+definePageMeta({
+  middleware: function (to, from) {
+    const user = useFirebaseUser();
+
+    if (!user.value) {
+      return navigateTo('/');
+    }
+  },
+});
 
 </script>
 

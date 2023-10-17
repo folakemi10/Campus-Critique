@@ -10,9 +10,9 @@
 
             <v-spacer></v-spacer>
 
-            <v-text-field v-if="firebaseUser" hide-details prepend-icon="mdi-magnify" single-line></v-text-field>
 
-            <v-btn v-if="firebaseUser" to="/review">
+            <v-btn v-if="firebaseUser" to="/review" class="text-none text-subtitle-1" color="#5865f2" size="small"
+                variant="flat">
                 Make a Review
             </v-btn>
 
@@ -36,6 +36,9 @@
 </template>
 
 <script setup>
+//for search bar in nav
+import { queryEntireCollection } from '~/lib/db';
+
 const firebaseUser = useFirebaseUser();
 
 const tabItems = [
@@ -44,16 +47,39 @@ const tabItems = [
 
 const tab = ref('Home');
 
-async function logoutRedirect(){
+async function logoutRedirect() {
     logout();
     await navigateTo("/");
 }
 
 function onTabClick(tab) {
-  if (tab === 'Home') {
-    navigateTo('/');
-  } else if (tab === 'Profile') {
-    navigateTo('/profile'); 
-  }
+    if (tab === 'Home') {
+        navigateTo('/');
+    } else if (tab === 'Profile') {
+        navigateTo('/profile');
+    }
 }
+
+
+// const allCourses = ref();
+
+// const selected = ref();
+
+// onMounted(async () => {
+//     allCourses.value = await queryEntireCollection('classes');
+// }
+// );
+
+
+// // watch works directly on a ref
+// watch(selected, async () => {
+//     await navigateTo({
+//         path: '/details/',
+//         query: {
+//             id: selected.value.id,
+//         },
+//         replace: true,
+//     })
+// })
+
 </script>

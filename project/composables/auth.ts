@@ -5,6 +5,8 @@ import {
   signOut,
   User,
   getAuth,
+  setPersistence,
+  browserSessionPersistence,
 } from "firebase/auth";
 
 import { auth } from "../lib/firebase";

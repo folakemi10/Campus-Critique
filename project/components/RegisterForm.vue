@@ -3,16 +3,20 @@
         <v-form @submit.prevent="onSubmit">
             <v-container>
                 <v-text-field v-model="userInformation.first" :rules="rules.required" color="primary" label="First name"
-                    variant="underlined"></v-text-field>
+                    variant="outlined"></v-text-field>
 
                 <v-text-field v-model="userInformation.last" :rules="rules.required" color="primary" label="Last name"
-                    variant="underlined"></v-text-field>
+                    variant="outlined"></v-text-field>
+
+
+                <v-text-field v-model="userInformation.username" :rules="rules.required" color="primary" label="Username"
+                    variant="outlined"></v-text-field>
 
                 <v-text-field v-model="userInformation.email" :rules="rules.email" color="primary" label="Email"
-                    variant="underlined"></v-text-field>
+                    variant="outlined"></v-text-field>
 
                 <v-text-field v-model="userInformation.password" :rules="rules.password" color="primary" label="Password"
-                    placeholder="Enter your password" variant="underlined"></v-text-field>
+                    placeholder="Enter your password" variant="outlined"></v-text-field>
 
                 <v-checkbox v-model="userInformation.terms" color="secondary"
                     label="I agree to site terms and conditions"></v-checkbox>
@@ -39,6 +43,7 @@ import { set } from "~/lib/db";
 const userInformation = ref({
     first: '',
     last: '',
+    username: '',
     email: '',
     password: '',
     terms: false,
@@ -65,6 +70,7 @@ async function addUser(firebaseUser: User, userInformation: any) {
             firstname: userInformation.first,
             lastname: userInformation.last,
             email: userInformation.email,
+            username: userInformation.username,
         })
 }
 
