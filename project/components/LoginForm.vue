@@ -1,13 +1,14 @@
 <template>
     <v-container>
         <v-card class="mx-auto" max-width="344" title="Log In">
-            <v-form validate-on="submit" @submit.prevent="onSubmit">
+            <v-form validate-on="submit" @submit.prevent="onSubmit" v-model="valid">
                 <v-container>
                     <v-text-field :rules="[rules.required, rules.email]" v-model="userLogin.email" color="primary"
                         label="Email" variant="underlined" required></v-text-field>
 
                     <v-text-field :rules="[rules.required]" v-model="userLogin.password" color="primary" label="Password"
-                        placeholder="Enter your password" variant="underlined" required></v-text-field>
+                        placeholder="Enter your password" variant="underlined" required :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show ? 'text' : 'password'" @click:append="show = !show"></v-text-field>
                 </v-container>
 
                 <v-divider></v-divider>
@@ -34,7 +35,9 @@ const userLogin = ref({
     password: "",
 });
 
-var loading = ref(false);
+let loading = ref(false);
+let valid = ref();
+let show = ref();
 
 const rules = ref({
     required: (value) => !!value || "Field is required",
@@ -50,7 +53,7 @@ async function onSubmit(event) {
     await login(userLogin.value.email, userLogin.value.password);
     const firebaseUser = useFirebaseUser();
 
-    if (firebaseUser.value !== null) {
+    if (firebaseUser.value !== null && valid.value) {
         await navigateTo("/");
     } else {
         console.log(firebaseUser.value);

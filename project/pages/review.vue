@@ -1,6 +1,6 @@
 <template>
   <GlobalNav />
-  <v-container>
+  <v-container v-if="firebaseUser">
     <v-form @submit.prevent="onSubmit" v-model="valid">
       <v-card class="m-6">
         <v-card-title>I want to rate a: </v-card-title>
@@ -41,6 +41,7 @@
       </div>
     </v-form>
   </v-container>
+
 </template>
 
 <script setup lang="ts">
@@ -48,7 +49,7 @@ import { add, queryEntireCollection, set } from "~/lib/db";
 
 //getting prof and class data from db
 const allCourses = ref();
-const allProfessors : Ref<string[]> = ref([]);
+const allProfessors: Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();

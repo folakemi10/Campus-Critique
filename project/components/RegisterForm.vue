@@ -1,31 +1,53 @@
 <template>
-    <v-card class="mx-auto" max-width="344" title="User Registration">
-        <v-form @submit.prevent="onSubmit">
+    <v-card class="mx-auto" max-width="480" title="Create an Account" v-if="!showNext">
+        <v-form @submit.prevent="next" v-model="valid1">
             <v-container>
-                <v-text-field v-model="userInformation.first" :rules="rules.required" color="primary" label="First name"
-                    variant="outlined"></v-text-field>
-
-                <v-text-field v-model="userInformation.last" :rules="rules.required" color="primary" label="Last name"
-                    variant="outlined"></v-text-field>
-
-
-                <v-text-field v-model="userInformation.username" :rules="rules.required" color="primary" label="Username"
-                    variant="outlined"></v-text-field>
-
-                <v-text-field v-model="userInformation.email" :rules="rules.email" color="primary" label="Email"
-                    variant="outlined"></v-text-field>
+                <v-text-field v-model="userInformation.email" :rules="rules.email" color="primary"
+                    label="Email"></v-text-field>
 
                 <v-text-field v-model="userInformation.password" :rules="rules.password" color="primary" label="Password"
-                    placeholder="Enter your password" variant="outlined"></v-text-field>
+                    placeholder="Enter your password" :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show ? 'text' : 'password'" @click:append="show = !show"></v-text-field>
 
-                <v-checkbox v-model="userInformation.terms" color="secondary"
-                    label="I agree to site terms and conditions"></v-checkbox>
+                <v-text-field :rules="rules.confirmPasswordRules" color="primary" label="Verify your password"
+                    placeholder="Enter your password" type="password"></v-text-field>
+            </v-container>
+
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn type="submit">
+                    Continue
+                    <v-icon icon="mdi-chevron-right" end></v-icon>
+                </v-btn>
+            </v-card-actions>
+
+
+        </v-form>
+    </v-card>
+
+    <v-card class="mx-auto" max-width="480" title="Tell Us More About Yourself" v-if="showNext">
+        <v-form @submit.prevent="onSubmit" v-model="valid2">
+            <v-container>
+                <v-text-field v-model="userInformation.first" :rules="rules.required" color="primary"
+                    label="First name"></v-text-field>
+
+                <v-text-field v-model="userInformation.last" :rules="rules.required" color="primary"
+                    label="Last name"></v-text-field>
+
+
+                <v-text-field v-model="userInformation.username" :rules="rules.required" color="primary"
+                    label="Username"></v-text-field>
             </v-container>
 
             <v-divider></v-divider>
 
             <v-card-actions>
                 <v-spacer></v-spacer>
+
+                <v-btn @click="next">
+                    <v-icon icon="mdi-chevron-left" end></v-icon>
+                    Back
+                </v-btn>
 
                 <v-btn color="success" type="submit">
                     Complete Registration
@@ -40,19 +62,36 @@
 import { User } from "firebase/auth";
 import { set } from "~/lib/db";
 
+//Object to hold user registration information
+//ref() makes anything reactive, aka anything that used to be held in data()
 const userInformation = ref({
     first: '',
     last: '',
     username: '',
     email: '',
     password: '',
-    terms: false,
 })
 
+//validation variable for form
+let valid1 = ref();
+let valid2 = ref();
+
+//variable to control if password is visible
+let show = ref();
+
+//variable to control moving back and forth on the forms
+let showNext = ref(false);
+
+//submit user to AUTHENTICATION and then redirect to home
 async function onSubmit(event: any) {
-    await register(userInformation.value.email, userInformation.value.password);
-
-
+    if(valid1.value && valid2.value){
+        for(const value in Object.values(userInformation.value)){
+            if(value === ''){
+                alert("not filled");
+            }
+        }
+        await register(userInformation.value.email, userInformation.value.password);
+    }
     const firebaseUser = useFirebaseUser();
 
     if (firebaseUser.value !== null) {
@@ -63,6 +102,8 @@ async function onSubmit(event: any) {
     }
 }
 
+
+//add user to USERS database
 async function addUser(firebaseUser: User, userInformation: any) {
     await set("users",
         {
@@ -74,6 +115,11 @@ async function addUser(firebaseUser: User, userInformation: any) {
         })
 }
 
+function next() {
+    if (valid1.value) {
+        showNext.value = !showNext.value;
+    }
+}
 
 const rules = ref({
     required: [(value: string) => !!value || "Field is required"],
@@ -85,6 +131,11 @@ const rules = ref({
         }
     ],
     password: [(value: string) => !!value || "Password is required", (value: string) => (value && value.length >= 6) || 'Password must be 6 or more characters',],
+    confirmPasswordRules: [
+        (value: string) => !!value || 'Password confirmation required',
+        (value: string) =>
+            value === userInformation.value.password || 'Password does not match',
+    ],
 });
 
 
