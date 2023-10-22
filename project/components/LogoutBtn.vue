@@ -1,5 +1,5 @@
 <template>
-    <v-btn color="primary" @click="logoutRedirect" v-if="firebaseUser">
+    <v-btn color="primary-button" @click="logoutRedirect" v-if="firebaseUser">
         Log Out
     </v-btn>
 </template>
