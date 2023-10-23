@@ -1,5 +1,5 @@
 <template>
-    <v-btn :variant="variant" @click="logoutRedirect" >
+    <v-btn :variant="variant" @click="logoutRedirect">
         Log Out
     </v-btn>
 </template>
@@ -12,7 +12,10 @@ async function logoutRedirect() {
 }
 
 const props = defineProps({
-  variant: String
+    variant: {
+        type: String as PropType<"outlined" | "flat" | "text" | "elevated" | "tonal" | "plain">,
+        default: "outlined", // Default to a valid Vuetify variant
+    },
 });
 </script>
 

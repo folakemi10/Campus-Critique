@@ -51,50 +51,22 @@
 
 
 
-            <!-- <template v-slot:extension>
-                <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="right">
-                    <v-tab v-for="item in tabItems" :key="item" :value="item" @click="onTabClick(item)">
-                        {{ item }}
-                    </v-tab>
-                </v-tabs>
-            </template> -->
+           
         </v-toolbar>
     </v-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import LogoutBtn from './LogoutBtn.vue';
 
 const firebaseUser = useFirebaseUser();
 
-const tabItems = [
-    'Home', 'Profile'
-];
-
-const tab = ref('Home');
 
 const user = ref({
     initials: 'JD',
     fullName: 'John Doe',
     email: 'john.doe@doe.com',
 });
-
-const menuItems = ref([
-    { title: 'Click Me' },
-    { title: 'Click Me' },
-    { title: 'Click Me' },
-    { title: 'Click Me 2' },
-]);
-
-
-
-function onTabClick(tab) {
-    if (tab === 'Home') {
-        navigateTo('/');
-    } else if (tab === 'Profile') {
-        navigateTo('/profile');
-    }
-}
 
 async function navigateToProfile(){
    await navigateTo('/profile');

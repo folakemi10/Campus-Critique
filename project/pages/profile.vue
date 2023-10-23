@@ -1,20 +1,50 @@
 <template>
-    <GlobalNav />
-    <v-container class="flex-vertical justify-center">
-        <v-card class="mx-10	my-10 ">
-            <v-card-text>
-                <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname}} {{ userName.lastname}}</h1>
-                <div class="text-lg mb-4">
-                    Number of Reviews: {{ allPosts ? allPosts.length : 'Loading...' }}
-                </div>
-                <LogoutBtn/>
-            </v-card-text>
-        </v-card>
+  <GlobalNav />
 
-        <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+  <v-card>
 
-        
-    </v-container>
+
+    <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
+      <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index" @click="onTabClick(item)">
+        {{ item }}
+      </v-tab>
+    </v-tabs>
+
+
+    <v-window v-model="tab">
+      <v-window-item :key="1" :value="1">
+        <v-container fluid>
+          <p>1</p>
+        </v-container>
+      </v-window-item>
+
+      <v-window-item  :key="2" :value="2">
+        <v-container fluid>
+          <p>2</p>
+        </v-container>
+      </v-window-item>
+    </v-window>
+  </v-card>
+
+
+
+
+
+  <v-container class="flex-vertical justify-center" v-if="tab == 'tab-0'">
+    <v-card class="mx-10	my-10 ">
+      <v-card-text>
+        <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
+        <div class="text-lg mb-4">
+          Number of Reviews: {{ allPosts ? allPosts.length : 'Loading...' }}
+        </div>
+        <LogoutBtn />
+      </v-card-text>
+    </v-card>
+
+    <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+
+
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -30,34 +60,57 @@ const userName = ref();
 
 
 onMounted(async () => {
-    //console.log('Entering onMounted hook');
+  //console.log('Entering onMounted hook');
 
-    if (userId) {
-        allPosts.value = await queryCollectionByField("posts", "uid", userId);
-    } else {
-        console.log('userId does not exist');
-    }
+  if (userId) {
+    allPosts.value = await queryCollectionByField("posts", "uid", userId);
+  } else {
+    console.log('userId does not exist');
+  }
 
-   // console.log('Exiting onMounted hook');
+  // console.log('Exiting onMounted hook');
 });
 
 const usersRef = collection(db, "users");
 const q = query(usersRef, where("uid", "==", userId));
 const querySnapshot = await getDocs(q);
 querySnapshot.forEach((doc) => {
-    // doc.data() is never undefined for query doc snapshots
-    userName.value = doc.data();
+  // doc.data() is never undefined for query doc snapshots
+  userName.value = doc.data();
 });
 
 definePageMeta({
-    middleware: function (to, from) {
-        const user = useFirebaseUser();
+  middleware: function (to, from) {
+    const user = useFirebaseUser();
 
-        if (!user.value) {
-            return navigateTo('/');
-        }
-    },
+    if (!user.value) {
+      return navigateTo('/');
+    }
+  },
 });
+
+
+//Control the sections of the profile page
+const tab = ref('tab-0');
+
+
+const tabItems = [
+  'Posts', 'Schedule'
+];
+
+
+
+function onTabClick(tab: string) {
+
+  if (tab === 'Posts') {
+
+  } else if (tab === 'Schedule') {
+
+  }
+}
+
+
+
 
 </script>
 
