@@ -1,5 +1,5 @@
 <template>
-    <v-btn color="primary-button" @click="logoutRedirect" v-if="firebaseUser">
+    <v-btn :variant="variant" @click="logoutRedirect" >
         Log Out
     </v-btn>
 </template>
@@ -10,6 +10,10 @@ async function logoutRedirect() {
     await logout();
     await navigateTo("/");
 }
+
+const props = defineProps({
+  variant: String
+});
 </script>
 
 <style lang="scss" scoped></style>
