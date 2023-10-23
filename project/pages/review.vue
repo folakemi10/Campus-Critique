@@ -1,6 +1,6 @@
 <template>
   <GlobalNav />
-  <v-container>
+  <v-container v-if="firebaseUser">
     <v-form @submit.prevent="onSubmit" v-model="valid">
       <v-card class="m-6">
         <v-card-title>I want to rate a: </v-card-title>
@@ -17,14 +17,26 @@
             return-object></v-autocomplete>
         </v-card>
 
+        <v-card class="m-6" v-if="formType == 'course'">
+          <v-card-title> Which professor taught this course? </v-card-title>
+          <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+            item-text="firstname" item-value="id" return-object></v-autocomplete>
+        </v-card>
+
         <v-card class="m-6" v-if="formType == 'professor'">
           <v-card-title>Which professor are you reviewing? </v-card-title>
           <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
             item-text="firstname" item-value="id" return-object></v-autocomplete>
         </v-card>
 
+        <v-card class="m-6" v-if="formType == 'professor'">
+          <v-card-title>Which course did you take with this professor? </v-card-title>
+          <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+            return-object></v-autocomplete>
+        </v-card>
+
         <v-card class="m-6">
-          <v-card-title>How would you rate this class or professor? </v-card-title>
+          <v-card-title>How would you rate this{{ formType == 'course' ? ' class' : ' professor' }}? </v-card-title>
           <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
         </v-card>
 
@@ -41,6 +53,7 @@
       </div>
     </v-form>
   </v-container>
+
 </template>
 
 <script setup lang="ts">
@@ -48,7 +61,7 @@ import { add, queryEntireCollection, set } from "~/lib/db";
 
 //getting prof and class data from db
 const allCourses = ref();
-const allProfessors : Ref<string[]> = ref([]);
+const allProfessors: Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();
@@ -69,14 +82,14 @@ onMounted(async () => {
 );
 
 
-
+//functions to watch the input of the autocompletes
 watch(selectedClass, async () => {
-  review.value.reviewedObject = selectedClass.value.id
+  review.value.class = selectedClass.value.id
   console.log(review.value);
 })
 
 watch(selectedProf, async () => {
-  review.value.reviewedObject = selectedProf.value.id
+  review.value.professor = selectedProf.value.id
   console.log(review.value);
 })
 
@@ -87,9 +100,18 @@ watch(selectedProf, async () => {
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
 
+let revealForm = ref(false);
+
+//sets form type to "course" or "professor" based on typeSelection, which is is a ref for the radio buttons"
+let formType = ref('');
+//data model for whether the Course or Professor radio button is selected
+const typeSelection = ref(null);
+
 const review = ref({
   uid: userId,
-  reviewedObject: '',
+  reviewedObject: typeSelection,
+  class: null,
+  professor: null,
   rating: 0,
   textReview: '',
 })
@@ -103,15 +125,13 @@ async function onSubmit() {
   }
 }
 
+//rules for all questions in the review form
 const rules = ref({
   required: [(value: string) => !!value || "This question is required"],
 });
 
-let revealForm = ref(false);
-let formType = ref('');
 
-const typeSelection = ref(null);
-
+//function to display the rest of the form depending on selection
 function onChange() {
   if (typeSelection.value === 'course') {
     revealForm.value = true;

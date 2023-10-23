@@ -1,11 +1,13 @@
 <template>
   <GlobalNav />
-  <div>
+  <!-- If user is logged in, display all the posts for the class -->
+  <v-container v-if="firebaseUser">
     <h1>Details for {{ currentDetail ? currentDetail : 'Loading...' }}</h1>
-
     <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
-
-  </div>
+  </v-container>
+  <v-container v-else>
+    Sign in to view what others have to say about {{ currentDetail }}
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -38,6 +40,14 @@ onMounted(async () => {
 
 }
 );
+
+function getAllPosts() {
+
+}
+
+function getOnePost() {
+
+}
 
 
 

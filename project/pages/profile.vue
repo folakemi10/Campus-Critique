@@ -1,22 +1,19 @@
 <template>
     <GlobalNav />
     <v-container class="flex-vertical justify-center">
-        <!-- <router-link to="/">
-            <v-btn>
-                return
-            </v-btn>
-        </router-link> -->
-
         <v-card class="mx-10	my-10 ">
             <v-card-text>
                 <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname}} {{ userName.lastname}}</h1>
                 <div class="text-lg mb-4">
                     Number of Reviews: {{ allPosts ? allPosts.length : 'Loading...' }}
                 </div>
+                <LogoutBtn/>
             </v-card-text>
         </v-card>
 
         <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+
+        
     </v-container>
 </template>
 

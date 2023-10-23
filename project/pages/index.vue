@@ -5,27 +5,24 @@
     <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
       Welcome to Campus Critique!</h1>
 
-    <v-btn to="/register">
+    <v-btn color="primary-button" to="/register">
       Get Started
     </v-btn>
-    <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected"
-      variant="outlined" return-object></v-autocomplete>
+    <v-autocomplete label="Search" placeholder="Search for a course or professor" prepend-inner-icon="mdi-magnify" rounded
+      variant="solo" auto-select-first class="flex-full-width" density="comfortable" item-props menu-icon=""
+      :items="allCourses" v-model="selected" return-object></v-autocomplete>
   </v-container>
 
   <v-container v-if="firebaseUser" class="flex-vertical justify-center">
     <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected"
       variant="outlined" return-object></v-autocomplete>
-      
+
     <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
   </v-container>
 </template>
   
 <script setup lang="ts">
-
-import { useRouter } from 'vue-router';
 import { queryEntireCollection } from "~/lib/db";
-
-const router = useRouter();
 
 const firebaseUser = useFirebaseUser();
 const allPosts = ref();
