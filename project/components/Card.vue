@@ -1,14 +1,14 @@
 <template>
   <v-card class="mx-10	my-10 ">
     <v-card-item>
-      <v-row align="center">
+      <v-row align-items="center">
         <v-col cols="auto">
           <!-- User who made the post -->
           {{ username }}
         </v-col>
 
         <v-col cols="auto">
-          <div class="d-flex align-center">
+          <div class="d-flex">
             <v-rating :model-value="review?.rating" color="amber" density="compact" half-increments readonly
               size="small"></v-rating>
             <v-card-subtitle class="ml-2">{{ review?.rating }}</v-card-subtitle>
@@ -50,14 +50,18 @@ import { queryCollectionByField } from '~/lib/db';
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 
-console.log(props.review);
-
 async function getUsername(uid: string) {
   const doc = await queryCollectionByField("users", "uid", uid);
 
+
+  //adding interface to get rid of error when trying to access username property
+  interface User {
+    id: string;
+    username: string;
+  }
+
   if (doc[0]?.hasOwnProperty('username')) {
-    //getting an error when trying to access username. Don't know how to suppress it, but it succesfully grabs the username from the returned user object
-    return doc[0].username;
+    return (doc[0] as User).username;
   } else {
     return "Anonymous User";
   }

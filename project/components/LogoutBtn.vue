@@ -1,5 +1,5 @@
 <template>
-    <v-btn color="primary-button" @click="logoutRedirect" v-if="firebaseUser">
+    <v-btn :variant="variant" @click="logoutRedirect">
         Log Out
     </v-btn>
 </template>
@@ -10,6 +10,13 @@ async function logoutRedirect() {
     await logout();
     await navigateTo("/");
 }
+
+const props = defineProps({
+    variant: {
+        type: String as PropType<"outlined" | "flat" | "text" | "elevated" | "tonal" | "plain">,
+        default: "outlined", // Default to a valid Vuetify variant
+    },
+});
 </script>
 
 <style lang="scss" scoped></style>

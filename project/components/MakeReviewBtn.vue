@@ -6,7 +6,6 @@
 
 <script setup lang="ts">
 const props = defineProps(['firebaseUser']);
-console.log(props.firebaseUser);
 
 </script>
 
