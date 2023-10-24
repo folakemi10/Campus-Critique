@@ -13,33 +13,53 @@
       :items="allCourses" v-model="selected" return-object></v-autocomplete>
   </v-container>
 
-  <v-container v-if="firebaseUser" class="flex-vertical justify-center">
+  <v-container v-if="authenticated" class="flex-vertical justify-center">
     <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allCourses" v-model="selected"
       variant="outlined" return-object></v-autocomplete>
-
-    <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+    <ClientOnly>
+      <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+    </ClientOnly>
   </v-container>
 </template>
   
 <script setup lang="ts">
 import { queryEntireCollection } from "~/lib/db";
 
+// data
 const firebaseUser = useFirebaseUser();
+const authenticated = ref(false);
 const allPosts = ref();
 const allCourses = ref();
 const allProfessors = ref();
-
 const selected = ref();
 
-onMounted(async () => {
-  allPosts.value = await queryEntireCollection('posts');
-  allCourses.value = await queryEntireCollection('classes');
-  allProfessors.value = await queryEntireCollection('profs');
+// methods
+async function loadContent() {
+  console.log(firebaseUser.value);
+  if (firebaseUser.value != null) {
+    console.log("User exists, Loading Data");
+
+    allPosts.value = await queryEntireCollection('posts');
+    console.log(allPosts.value)
+
+    allCourses.value = await queryEntireCollection('classes');
+    console.log(allCourses.value);
+
+    allProfessors.value = await queryEntireCollection('profs');
+    console.log(allProfessors.value);
+
+    authenticated.value = true;
+  }
+  else {
+    console.log("No User, Clearing Data");
+    authenticated.value = false;
+  }
 }
-);
 
-
-
+// watch
+watch(firebaseUser, async () => {
+  await loadContent();
+});
 // watch works directly on a ref
 watch(selected, async () => {
   await navigateTo({
@@ -50,6 +70,12 @@ watch(selected, async () => {
     replace: true,
   })
 })
+
+// mounted
+onMounted(async () => {
+  console.log("Mounted");
+  await loadContent();
+});
 
 
 </script>

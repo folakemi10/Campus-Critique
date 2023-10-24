@@ -47,33 +47,35 @@ export async function logout() {
   }
 }
 
-/**
- * Registers a new user using Firebase Auth
- * @param email email of new user
- * @param password unhashed password of new user
- * @returns New user if success, error if fail
- */
-export async function register(email: string, password: string) {
-  console.log("Register");
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-    onAuthStateChanged(auth, (user) => stateChange(user));
-    return user;
-  } catch (e: any) {
-    return error(e);
-  }
-}
+// just use createUserWithEmailAndPassword instead
+
+// /**
+//  * Registers a new user using Firebase Auth
+//  * @param email email of new user
+//  * @param password unhashed password of new user
+//  * @returns New user if success, error if fail
+//  */
+// export async function register(email: string, password: string) {
+//   console.log("Register");
+//   try {
+//     const userCredential = await createUserWithEmailAndPassword(
+//       auth,
+//       email,
+//       password
+//     );
+//     const user = userCredential.user;
+//     onAuthStateChanged(auth, (user) => stateChange(user));
+//     return user;
+//   } catch (e: any) {
+//     return error(e);
+//   }
+// }
 
 /**
  * Gets the status of the current user
  * @returns User if success, error if fail
  */
-export async function status() {
+export async function auth_status() {
   try {
     return auth.currentUser;
   } catch (e: any) {
@@ -104,9 +106,9 @@ export const initUser = async () => {
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      console.log("Auth changed: " + user.email);
+      console.log("Auth State Change: " + user.email);
     } else {
-      console.log("auth change");
+      console.log("Auth State Change: No User");
     }
 
     firebaseUser.value = user;

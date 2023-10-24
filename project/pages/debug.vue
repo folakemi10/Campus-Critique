@@ -35,6 +35,7 @@
 
 
 <script lang="ts">
+import { auth_status } from '~/composables/auth';
 //import { login, logout, status } from "../lib/auth";
 
 export default {
@@ -57,7 +58,7 @@ export default {
             this.user_info = JSON.stringify(result);
         },
         async submit_status() {
-            const user = await status();
+            const user = await auth_status();
             this.user_info = JSON.stringify(user);
         }
     }
