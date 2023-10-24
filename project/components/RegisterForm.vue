@@ -59,8 +59,9 @@
 </template>
 
 <script setup lang="ts">
-import { User } from "firebase/auth";
+import { createUserWithEmailAndPassword, User } from "firebase/auth";
 import { set } from "~/lib/db";
+import { auth } from "~/lib/firebase";
 
 //Object to hold user registration information
 //ref() makes anything reactive, aka anything that used to be held in data()
@@ -90,15 +91,18 @@ async function onSubmit(event: any) {
                 alert("not filled");
             }
         }
-        await register(userInformation.value.email, userInformation.value.password);
     }
-    const firebaseUser = useFirebaseUser();
-
-    if (firebaseUser.value !== null) {
-        addUser(firebaseUser.value, userInformation.value);
+    
+    const email = userInformation.value.email;
+    const password = userInformation.value.password;
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
+        await addUser(firebaseUser, userInformation.value);
         await navigateTo("/");
-    } else {
-        console.log(firebaseUser.value);
+    }
+    catch (e: any) {
+        console.error(e);
     }
 }
 
@@ -112,6 +116,7 @@ async function addUser(firebaseUser: User, userInformation: any) {
             lastname: userInformation.last,
             email: userInformation.email,
             username: userInformation.username,
+            admin: false
         })
 }
 
