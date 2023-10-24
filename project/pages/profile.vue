@@ -1,51 +1,41 @@
 <template>
   <GlobalNav />
-
   <v-card>
-
-
     <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
-      <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index" @click="onTabClick(item)">
+      <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
         {{ item }}
       </v-tab>
     </v-tabs>
 
+    <v-window v-model="tab" class="bg-black">
+      <v-window-item value="tab-0">
+        <v-container fluid class="flex-vertical justify-center">
+          <v-card class="mx-10	my-10 ">
+            <v-card-text>
+              <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
+              <div class="text-lg mb-4">
+                Number of Reviews: {{ allPosts ? allPosts.length : 'Loading...' }}
+              </div>
+              <LogoutBtn />
+            </v-card-text>
+          </v-card>
 
-    <v-window v-model="tab">
-      <v-window-item :key="1" :value="1">
-        <v-container fluid>
-          <p>1</p>
+          <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+
         </v-container>
       </v-window-item>
 
-      <v-window-item  :key="2" :value="2">
+      <v-window-item value="tab-1">
         <v-container fluid>
-          <p>2</p>
+          <Calendar />
         </v-container>
       </v-window-item>
     </v-window>
   </v-card>
-
-
-
-
-
-  <v-container class="flex-vertical justify-center" v-if="tab == 'tab-0'">
-    <v-card class="mx-10	my-10 ">
-      <v-card-text>
-        <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
-        <div class="text-lg mb-4">
-          Number of Reviews: {{ allPosts ? allPosts.length : 'Loading...' }}
-        </div>
-        <LogoutBtn />
-      </v-card-text>
-    </v-card>
-
-    <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
-
-
-  </v-container>
 </template>
+
+
+
 
 <script setup lang="ts">
 import { queryCollectionByField } from '~/lib/db';
@@ -99,20 +89,11 @@ const tabItems = [
 ];
 
 
-
-function onTabClick(tab: string) {
-
-  if (tab === 'Posts') {
-
-  } else if (tab === 'Schedule') {
-
-  }
-}
-
-
-
-
 </script>
+
+<style lang="scss" scoped>
+
+</style>
 
 
 <!-- <script>
