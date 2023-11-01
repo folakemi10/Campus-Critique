@@ -13,10 +13,10 @@
             <MakeReviewBtn :firebaseUser="firebaseUser" />
 
 
+            <LoginBtn :button-text="'Login'" :size="'large'"/>
+            <RegisterBtn :button-text="'Join'" :size="'large'"/>
 
-            <v-btn v-if="!firebaseUser" to="/login">
-                Log In
-            </v-btn>
+
 
 
 
@@ -43,7 +43,7 @@
                                 Profile
                             </v-btn>
                             <v-divider class="my-3"></v-divider>
-                            <LogoutBtn variant="text"/>
+                            <LogoutBtn variant="text" />
                         </div>
                     </v-card-text>
                 </v-card>
@@ -51,12 +51,13 @@
 
 
 
-           
+
         </v-toolbar>
     </v-card>
 </template>
 
 <script setup lang="ts">
+import type { RegisterBtn } from '#ui-colors/components';
 import LogoutBtn from './LogoutBtn.vue';
 
 const firebaseUser = useFirebaseUser();
@@ -68,8 +69,8 @@ const user = ref({
     email: 'john.doe@doe.com',
 });
 
-async function navigateToProfile(){
-   await navigateTo('/profile');
+async function navigateToProfile() {
+    await navigateTo('/profile');
 }
 
 

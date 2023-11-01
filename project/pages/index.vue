@@ -1,16 +1,15 @@
 <template>
   <GlobalNav />
-
-  <v-container v-if="!firebaseUser">
+  <v-container v-if="!authenticated">
     <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
       Welcome to Campus Critique!</h1>
 
     <v-btn color="primary-button" to="/register">
-      Get Started
+      Join Us
     </v-btn>
-    <v-autocomplete label="Search" placeholder="Search for a course or professor" prepend-inner-icon="mdi-magnify" rounded
+    <!-- <v-autocomplete label="Search" placeholder="Search for a course or professor" prepend-inner-icon="mdi-magnify" rounded
       variant="solo" auto-select-first class="flex-full-width" density="comfortable" item-props menu-icon=""
-      :items="allCourses" v-model="selected" return-object></v-autocomplete>
+      :items="allCourses" v-model="selected" return-object></v-autocomplete> -->
   </v-container>
 
   <v-container v-if="authenticated" class="flex-vertical justify-center">
@@ -21,6 +20,8 @@
     </ClientOnly>
   </v-container>
 </template>
+
+
   
 <script setup lang="ts">
 import { queryEntireCollection } from "~/lib/db";
