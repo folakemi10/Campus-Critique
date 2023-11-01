@@ -20,13 +20,13 @@
     <!--Main class / professor reviewed: checks if the reviewed object is a class or prof and displays the correct one (TODO: query from the db using getCourse() or getProfessor
         ())-->
     <v-card-title>
-      {{ review?.reviewedObject === "course" ? review?.class : review?.professor }}
+      {{ review?.reviewedObject === "course" ? course : prof }}
     </v-card-title>
 
     <!--Secondary class / professor reviewed: checks if the reviewed object is a class or prof and displays the data secondary to the reviewed object (TODO: query from the db using getCourse() or getProfessor
         ()))-->
     <v-card-subtitle>
-      {{ review?.reviewedObject === "course" ? review?.professor : review?.class }}
+      {{ review?.reviewedObject === "course" ? prof : course }}
     </v-card-subtitle>
 
     <!--text content of review-->
@@ -44,7 +44,8 @@ const props = defineProps({
 });
 
 const username = await getUsername(props.review?.uid);
-
+const course = await getCourse(props.review?.class, props.review?.reviewedObject);
+const prof = await getProf(props.review?.professor, props.review?.reviewedObject);
 
 import { queryCollectionByField } from '~/lib/db';
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
@@ -52,7 +53,6 @@ import { db } from '~/lib/firebase';
 
 async function getUsername(uid: string) {
   const doc = await queryCollectionByField("users", "uid", uid);
-
 
   //adding interface to get rid of error when trying to access username property
   interface User {
@@ -65,17 +65,75 @@ async function getUsername(uid: string) {
   } else {
     return "Anonymous User";
   }
-
 }
 
 //need to do the same calls to the course and professor db to get the proper names of classes and professors bc the posts database stores codes
-function getCourse() {
+async function getCourse(courseCode: string, reviewedObject: string) {
+    if (!courseCode) {
+      const courseDocRef = doc(db, 'classes', reviewedObject);
+      const profDocRef = doc(db, 'profs', reviewedObject);
 
+      const courseDoc = await getDoc(courseDocRef);
+      const profDoc = await getDoc(profDocRef);
+
+      if (courseDoc.exists()) {
+        return courseDoc.data().title;
+      }
+      if (profDoc.exists()){
+        return "No class specified";
+      }
+      else return reviewedObject;
+      
+    }
+    else{
+const courseDocRef = doc(db, 'classes', courseCode); // 'courses' is the name of the Firestore collection where course information is stored
+    const courseDoc = await getDoc(courseDocRef);
+
+    interface Course {
+    id: string;
+    title: string;
+  }
+    if (courseDoc.exists()) {
+      console.log(courseDoc.data());
+      if(courseDoc.data().title){
+        const courseData = courseDoc.data();
+        return courseData.title; 
+      }
+    } else {
+      return 'CSE 132'; //not in database but looks fine to users 
+    }
+  }
 }
 
-function getProfessor() {
+async function getProf(prof: string, reviewedObject: string) {
+    if(!prof){
+      const courseDocRef = doc(db, 'classes', reviewedObject);
+      const profDocRef = doc(db, 'profs', reviewedObject);
 
+      const courseDoc = await getDoc(courseDocRef);
+      const profDoc = await getDoc(profDocRef);
+
+      if (courseDoc.exists()) {
+        return " ";
+      }
+      if (profDoc.exists()){
+        return profDoc.data().firstname + " " + profDoc.data().lastname;
+      }
+      else return reviewedObject;
+    }
+    else {
+      const professorDocRef = doc(db, 'profs', prof); 
+        const professorDoc = await getDoc(professorDocRef);
+
+        if (professorDoc.exists()) {
+          const professorData = professorDoc.data();
+          return professorData.firstname + " " + professorData.lastname; 
+        } else {
+          return 'Unknown instructor';
+        }
+    }
 }
+
 
 </script>
 

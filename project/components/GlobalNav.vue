@@ -43,7 +43,11 @@
                                 Profile
                             </v-btn>
                             <v-divider class="my-3"></v-divider>
-                            <LogoutBtn variant="text" />
+                            <v-btn variant="text" @click="navigateToFriends">
+                                Friends
+                            </v-btn>
+                            <v-divider class="my-3"></v-divider>
+                            <LogoutBtn variant="text"/>
                         </div>
                     </v-card-text>
                 </v-card>
@@ -71,6 +75,11 @@ const user = ref({
 
 async function navigateToProfile() {
     await navigateTo('/profile');
+}
+
+
+async function navigateToFriends(){
+   await navigateTo('/friends');
 }
 
 
