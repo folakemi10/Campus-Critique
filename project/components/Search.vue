@@ -1,26 +1,8 @@
 <template>
-  <GlobalNav />
-  <v-container v-if="!authenticated">
-    <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-      Welcome to Campus Critique!</h1>
-
-    <v-btn color="primary-button" to="/register">
-      Join Us
-    </v-btn>
-    <!-- <v-autocomplete label="Search" placeholder="Search for a course or professor" prepend-inner-icon="mdi-magnify" rounded
-      variant="solo" auto-select-first class="flex-full-width" density="comfortable" item-props menu-icon=""
-      :items="allCourses" v-model="selected" return-object></v-autocomplete> -->
-  </v-container>
-
-  <v-container v-if="authenticated" class="flex-vertical justify-center">
-    <Search />
-    <ClientOnly>
-      <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
-    </ClientOnly>
-  </v-container>
+  <v-autocomplete label="Search" placeholder="Search for a course or professor" :items="allObjects" v-model="selected"
+    variant="outlined" return-object></v-autocomplete>
 </template>
-
-
+  
   
 <script setup lang="ts">
 import { queryEntireCollection } from "~/lib/db";
@@ -34,17 +16,20 @@ const allCourses = ref();
 const allProfessors = ref();
 const selected = ref();
 
+const allObjects = ref();
+
+
 // methods
 async function loadContent() {
-  console.log(firebaseUser.value);
   if (firebaseUser.value != null) {
-    console.log("User exists, Loading Data");
 
     allPosts.value = await queryEntireCollection('posts');
 
     allCourses.value = await queryEntireCollection('classes');
 
     allProfessors.value = await queryEntireCollection('profs');
+
+    allObjects.value = allProfessors.value.concat(allCourses.value);
 
     authenticated.value = true;
   }
@@ -78,3 +63,4 @@ onMounted(async () => {
 
 
 </script>
+  

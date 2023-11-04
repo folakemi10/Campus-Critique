@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { createUserWithEmailAndPassword, User } from "firebase/auth";
+import { createUserWithEmailAndPassword, type User } from "firebase/auth";
 import { set } from "~/lib/db";
 import { auth } from "~/lib/firebase";
 

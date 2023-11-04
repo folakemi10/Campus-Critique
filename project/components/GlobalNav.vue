@@ -10,16 +10,16 @@
 
             <v-spacer></v-spacer>
 
-            <MakeReviewBtn :firebaseUser="firebaseUser" />
+            <!-- <MakeReviewBtn :firebaseUser="firebaseUser" /> -->
 
 
-            <LoginBtn :button-text="'Login'" :size="'large'"/>
-            <RegisterBtn :button-text="'Join'" :size="'large'"/>
+            <div v-if="!firebaseUser">
+                <LoginBtn :button-text="'Login'" :size="'large'" />
+                <RegisterBtn :button-text="'Join'" :size="'large'" />
+            </div>
 
 
-
-
-
+            <!--Dropdown menu from Avatar-->
             <v-menu min-width="200px" rounded v-if="firebaseUser">
                 <template v-slot:activator="{ props }">
                     <v-btn icon v-bind="props">
@@ -47,7 +47,7 @@
                                 Friends
                             </v-btn>
                             <v-divider class="my-3"></v-divider>
-                            <LogoutBtn variant="text"/>
+                            <LogoutBtn variant="text" />
                         </div>
                     </v-card-text>
                 </v-card>
@@ -78,8 +78,8 @@ async function navigateToProfile() {
 }
 
 
-async function navigateToFriends(){
-   await navigateTo('/friends');
+async function navigateToFriends() {
+    await navigateTo('/friends');
 }
 
 

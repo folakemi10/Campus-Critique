@@ -2,11 +2,13 @@
   <GlobalNav />
   <!-- If user is logged in, display all the posts for the class -->
   <v-container>
-    <v-container>
-      <h1>Details for {{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
-    </v-container>
+    <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
+    <v-card>
+      <h1>{{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
+      <h1>{{ calculateAverage }}</h1>
+    </v-card>
 
-    <Card v-for="(review, index) in displayedPosts" :key="index" :review="review"></Card>
+    <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
 
     <v-container v-if="!firebaseUser">
       Sign in to view what others have to say about {{ currentObjectName }}
@@ -15,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { doc, getDoc } from "firebase/firestore";
+import { average, doc, getDoc } from "firebase/firestore";
 import { ref, onMounted, computed, watch } from 'vue';
 import { db } from '~/lib/firebase';
 import { queryCollectionByField } from '~/lib/db';
@@ -24,27 +26,7 @@ const reviewedObjectId = String(useRoute().query.id);
 const firebaseUser = useFirebaseUser();
 
 const currentObjectName = ref<null | string>(null);
-const specificPosts = ref<{ id: string }[]>([]);
-
-// Fetch specific posts and current object name
-onMounted(async () => {
-  specificPosts.value = await queryCollectionByField('posts', 'reviewedObject', reviewedObjectId);
-
-  const docRef = doc(db, "classes", reviewedObjectId);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    currentObjectName.value = docSnap.data().title;
-  } else {
-    // Handle the case when the document doesn't exist
-    currentObjectName.value = "Error. Please refresh";
-  }
-});
-
-// Determines if only one post or all should be displayed
-const displayedPosts = computed(() => {
-  return firebaseUser.value ? specificPosts.value : (specificPosts.value.length > 0 ? [specificPosts.value[0]] : []);
-});
+const specificPosts = ref<any[]>([]);
 
 // Use watch to watch the user variable
 watch(firebaseUser, (newValue) => {
@@ -52,4 +34,57 @@ watch(firebaseUser, (newValue) => {
     firebaseUser.value = newValue;
   }
 });
+
+// Fetch specific posts and current object name
+onMounted(async () => {
+  specificPosts.value = await queryCollectionByField('posts', 'reviewedObject', reviewedObjectId);
+  currentObjectName.value = await getObject(reviewedObjectId);
+
+});
+
+
+async function getObject(id: string) {
+  const courseDocRef = doc(db, 'classes', id);
+  const profDocRef = doc(db, 'profs', id);
+
+  const courseDoc = await getDoc(courseDocRef);
+  const profDoc = await getDoc(profDocRef);
+
+  if (courseDoc.exists()) {
+    return courseDoc.data().title;
+  }
+  if (profDoc.exists()) {
+    return profDoc.data().title;
+  }
+  else return id;
+}
+
+const calculateAverage = (): number => {
+  if (specificPosts.value.length === 0) {
+    return 0; // Return 0 if the array is empty to avoid division by zero.
+  }
+
+  let sum = 0;
+
+  for (const post of specificPosts.value) {
+    if (post.hasOwnProperty("rating")) {
+      sum += post.rating;
+    }
+  }
+
+  const average = sum / specificPosts.value.length;
+  return average;
+};
+
+
+
+
+// // Determines if only one post or all should be displayed
+// const displayedPosts = computed(() => {
+//   return firebaseUser.value ? specificPosts.value : (specificPosts.value.length > 0 ? [specificPosts.value[0]] : []);
+// });
 </script>
+
+
+
+
