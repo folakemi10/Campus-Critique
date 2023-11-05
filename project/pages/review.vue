@@ -43,8 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { add, queryEntireCollection, set } from "~/lib/db";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { queryEntireCollection, set } from "~/lib/db";
+import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 
 //getting prof and class data from db
@@ -100,6 +100,8 @@ const review = ref({
   professor: '',
   rating: 0,
   textReview: '',
+  createdAt: null as FieldValue | null,
+  modifiedAt: null as FieldValue | null
 })
 
 
@@ -141,9 +143,19 @@ async function getObject(id: string) {
   else return id;
 }
 
+async function addPost() {
+  // apply timestamp
+  const ts = serverTimestamp();
+  review.value.createdAt = ts;
+  review.value.modifiedAt = ts;
+
+  const colRef = collection(db, "posts");
+  const docRef = await addDoc(colRef, review.value);
+}
+
 async function onSubmit() {
   if (valid.value) {
-    await add("posts", review.value);
+    await addPost();
     await navigateTo('/');
   } else {
     //alert("All fields required!");
