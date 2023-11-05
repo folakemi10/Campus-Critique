@@ -10,16 +10,16 @@
 
             <v-spacer></v-spacer>
 
-            <MakeReviewBtn :firebaseUser="firebaseUser" />
+            <!-- <MakeReviewBtn :firebaseUser="firebaseUser" /> -->
 
 
+            <div v-if="!firebaseUser">
+                <LoginBtn :button-text="'Login'" :size="'large'" />
+                <RegisterBtn :button-text="'Join'" :size="'large'" />
+            </div>
 
-            <v-btn v-if="!firebaseUser" to="/login">
-                Log In
-            </v-btn>
 
-
-
+            <!--Dropdown menu from Avatar-->
             <v-menu min-width="200px" rounded v-if="firebaseUser">
                 <template v-slot:activator="{ props }">
                     <v-btn icon v-bind="props">
@@ -47,7 +47,7 @@
                                 Friends
                             </v-btn>
                             <v-divider class="my-3"></v-divider>
-                            <LogoutBtn variant="text"/>
+                            <LogoutBtn variant="text" />
                         </div>
                     </v-card-text>
                 </v-card>
@@ -55,12 +55,13 @@
 
 
 
-           
+
         </v-toolbar>
     </v-card>
 </template>
 
 <script setup lang="ts">
+import type { RegisterBtn } from '#ui-colors/components';
 import LogoutBtn from './LogoutBtn.vue';
 
 const firebaseUser = useFirebaseUser();
@@ -72,13 +73,13 @@ const user = ref({
     email: 'john.doe@doe.com',
 });
 
-async function navigateToProfile(){
-   await navigateTo('/profile');
+async function navigateToProfile() {
+    await navigateTo('/profile');
 }
 
 
-async function navigateToFriends(){
-   await navigateTo('/friends');
+async function navigateToFriends() {
+    await navigateTo('/friends');
 }
 
 

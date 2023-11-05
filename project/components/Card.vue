@@ -69,35 +69,35 @@ async function getUsername(uid: string) {
 
 //need to do the same calls to the course and professor db to get the proper names of classes and professors bc the posts database stores codes
 async function getCourse(courseCode: string, reviewedObject: string) {
-    if (!courseCode) {
-      const courseDocRef = doc(db, 'classes', reviewedObject);
-      const profDocRef = doc(db, 'profs', reviewedObject);
+  if (!courseCode) {
+    const courseDocRef = doc(db, 'classes', reviewedObject);
+    const profDocRef = doc(db, 'profs', reviewedObject);
 
-      const courseDoc = await getDoc(courseDocRef);
-      const profDoc = await getDoc(profDocRef);
+    const courseDoc = await getDoc(courseDocRef);
+    const profDoc = await getDoc(profDocRef);
 
-      if (courseDoc.exists()) {
-        return courseDoc.data().title;
-      }
-      if (profDoc.exists()){
-        return "No class specified";
-      }
-      else return reviewedObject;
-      
+    if (courseDoc.exists()) {
+      return courseDoc.data().title;
     }
-    else{
-const courseDocRef = doc(db, 'classes', courseCode); // 'courses' is the name of the Firestore collection where course information is stored
+    if (profDoc.exists()) {
+      return "No class specified";
+    }
+    else return reviewedObject;
+
+  }
+  else {
+    const courseDocRef = doc(db, 'classes', courseCode); // 'courses' is the name of the Firestore collection where course information is stored
     const courseDoc = await getDoc(courseDocRef);
 
     interface Course {
-    id: string;
-    title: string;
-  }
+      id: string;
+      title: string;
+    }
     if (courseDoc.exists()) {
-      console.log(courseDoc.data());
-      if(courseDoc.data().title){
+      //console.log(courseDoc.data());
+      if (courseDoc.data().title) {
         const courseData = courseDoc.data();
-        return courseData.title; 
+        return courseData.title;
       }
     } else {
       return 'CSE 132'; //not in database but looks fine to users 
@@ -106,34 +106,33 @@ const courseDocRef = doc(db, 'classes', courseCode); // 'courses' is the name of
 }
 
 async function getProf(prof: string, reviewedObject: string) {
-    if(!prof){
-      const courseDocRef = doc(db, 'classes', reviewedObject);
-      const profDocRef = doc(db, 'profs', reviewedObject);
+  if (!prof) {
+    const courseDocRef = doc(db, 'classes', reviewedObject);
+    const profDocRef = doc(db, 'profs', reviewedObject);
 
-      const courseDoc = await getDoc(courseDocRef);
-      const profDoc = await getDoc(profDocRef);
+    const courseDoc = await getDoc(courseDocRef);
+    const profDoc = await getDoc(profDocRef);
 
-      if (courseDoc.exists()) {
-        return " ";
-      }
-      if (profDoc.exists()){
-        return profDoc.data().firstname + " " + profDoc.data().lastname;
-      }
-      else return reviewedObject;
+    if (courseDoc.exists()) {
+      return " ";
     }
-    else {
-      const professorDocRef = doc(db, 'profs', prof); 
-        const professorDoc = await getDoc(professorDocRef);
-
-        if (professorDoc.exists()) {
-          const professorData = professorDoc.data();
-          return professorData.firstname + " " + professorData.lastname; 
-        } else {
-          return 'Unknown instructor';
-        }
+    if (profDoc.exists()) {
+      return profDoc.data().firstname + " " + profDoc.data().lastname;
     }
+    else return reviewedObject;
+  }
+  else {
+    const professorDocRef = doc(db, 'profs', prof);
+    const professorDoc = await getDoc(professorDocRef);
+
+    if (professorDoc.exists()) {
+      const professorData = professorDoc.data();
+      return professorData.firstname + " " + professorData.lastname;
+    } else {
+      return 'Unknown instructor';
+    }
+  }
 }
-
 
 </script>
 
