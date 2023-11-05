@@ -1,40 +1,43 @@
 <template>
+<ClientOnly>
   <GlobalNav />
-  <v-form @submit.prevent="onSubmit">
+</ClientOnly>
+  <v-form v-if="isAdmin" @submit.prevent="onSubmit">
 
     <!-- Selecting either professor or class -->
     <v-card class="m-6">
-      <v-card-title>I want to add/edit a: </v-card-title>
+      <v-card-title>I want to add/edit/remove a: </v-card-title>
       <v-radio-group v-model="formCategory" inline @update:modelValue="onTypeChoose">
         <v-radio label="Class" value="class"></v-radio>
         <v-radio label="Professor" value="prof"></v-radio>
       </v-radio-group>
     </v-card>
 
-    <!-- Add or Edit -->
+    <!-- Add, Edit, or Remove -->
     <v-card v-if="formCategory != ''" class="m-6">
       <v-radio-group v-model="formType" inline @update:modelValue="onTypeChoose">
         <v-radio label="Add" value="add"></v-radio>
         <v-radio label="Edit" value="edit"></v-radio>
+        <v-radio label="Remove" value="remove"></v-radio>
       </v-radio-group>
     </v-card>
 
     <!-- Editing Class -->
-    <v-card class="m-6" v-if="formCategory=='class' && formType=='edit'">
-      <v-card-title>Which class are you editing?</v-card-title>
+    <v-card class="m-6" v-if="formCategory=='class' && (formType=='edit' || formType=='remove')">
+      <v-card-title>Which class are you {{verb}}?</v-card-title>
       <v-autocomplete label="Classes" v-model="classData" return-object
         :items="classes" item-title="title" @update:modelValue="onSubjectChoose"></v-autocomplete>
     </v-card>
 
     <!-- Editing Professor -->
-    <v-card class="m-6" v-if="formCategory=='prof' && formType=='edit'">
-      <v-card-title>Which professor are you editing? </v-card-title>
+    <v-card class="m-6" v-if="formCategory=='prof' && (formType=='edit' || formType=='remove')">
+      <v-card-title>Which professor are you {{verb}}? </v-card-title>
       <v-autocomplete label="Professors" v-model="profData"
         :items="profs" item-title="firstname" item-value="value" @update:modelValue="onSubjectChoose"></v-autocomplete>
     </v-card>
 
     <!-- Class Form -->
-    <v-card class="m-6" v-if="(subjectChosen == true || formType == 'add') && formCategory=='class'">
+    <v-card class="m-6" v-if="((subjectChosen == true && formType == 'edit') || formType == 'add') && formCategory=='class'">
       <v-text-field label="Title" v-model="classData.title"></v-text-field>
       <v-text-field label="Department" v-model="classData.department"></v-text-field>
       <v-text-field label="School" v-model="classData.school"></v-text-field>
@@ -54,22 +57,24 @@
     </v-card>
 
     <!-- Professor Form -->
-    <v-card class="m-6" v-if="(subjectChosen == true || formType == 'add') && formCategory=='prof'">
+    <v-card class="m-6" v-if="((subjectChosen == true && formType == 'edit') || formType == 'add') && formCategory=='prof'">
       <v-text-field label="First Name" v-model="profData.firstname"></v-text-field>
       <v-text-field label="Last Name" v-model="profData.lastname"></v-text-field>
     </v-card>
 
-    <v-btn type="submit" v-if="!isEmptyData" block class="mt-2" text="Submit"></v-btn>
+    <v-btn type="submit" v-if="!isEmptyData || (formType == 'remove' && subjectChosen)" block class="mt-2" text="Submit"></v-btn>
 
     <div id="error">
       {{errorMessage}}
     </div>
-
   </v-form>
+  <div v-else>
+    Please wait... (unless you're not an admin, in which case why are you here)
+  </div>
 </template>
 
 <script>
-import { addDoc, collection, doc, DocumentReference, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, updateDoc, query, where, getDoc, deleteDoc } from "firebase/firestore";
 
 import { queryEntireCollection } from '~/lib/db';
 import { db } from "~/lib/firebase"
@@ -77,6 +82,12 @@ import { db } from "~/lib/firebase"
 export default {
 data() {
   return {
+    // auth
+    firebaseUser: useFirebaseUser(),
+    isAdmin: false,
+    authorized: false,
+
+
     subjectChosen: false,
     formType: "",
     formCategory: "",
@@ -86,16 +97,8 @@ data() {
     profs: [],
 
     // currently being edited
-    classData: {
-      title: "",
-      department: "",
-      profs: [],
-      school: ""
-    },
-    profData: {
-      firstname: "",
-      lastname: ""
-    },
+    classData: null,
+    profData: null,
 
     // adding prof to class
     newClassProfID: null,
@@ -105,6 +108,13 @@ data() {
   }
 },
 computed: {
+  verb() {
+    switch (this.formType) {
+      case "add": return "adding";
+      case "edit": return "editing";
+      default: return "removing";
+    }
+  },
   /**
    * Full names of all the professors in the database
    */
@@ -127,6 +137,9 @@ computed: {
     }
     // check if all required data exists
     const data = this.formCategory == "class" ? this.classData : this.profData;
+    if (!data) {
+      return true;
+    }
     for (let [key, value] of Object.entries(data)) {
       if ( key != "id" && (value == "" || value == [])) {
         return true;
@@ -136,6 +149,42 @@ computed: {
   }
 },
 methods: {
+  async checkForAdmin() {
+    if (!this.firebaseUser) {
+      return false;
+    }
+
+    const uid = this.firebaseUser.uid;
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      console.error(`users document ${uid} does not exist`);
+      return false;
+    }
+
+    const user = docSnap.data();
+    console.log(user);
+    if (user.admin) {
+      this.isAdmin = true;
+      await this.resetForm();
+    }
+    this.authorized = true;
+    return true;
+  },
+  async loadData() {
+    this.classes = await queryEntireCollection("classes");
+
+    const profs = await queryEntireCollection("profs");
+    // needed for v-autocomplete to work properly
+    this.profs = profs.map(p => {
+      return {
+        // i wanted to name this field "fullname" but i was getting bizarre errors...
+        // probably vuetify's fault idk
+        firstname: p.firstname + " " + p.lastname, 
+        value: p
+      }
+    }); 
+  },
   /**
    * Handler after choosing form options
    */
@@ -190,10 +239,43 @@ methods: {
     }
   },
   /**
-   * Handler for submitting the form
+   * Handlers for submitting the form
    */
   async onSubmit() {
+    if (this.formType == "remove") {
+      await this.handleRemove();
+    }
+    else {
+      await this.handleAddOrEdit();
+    }
+    await this.resetForm();
+  },
+  async handleRemove() {
+    let id = null;
+    let col = null;
 
+    // remove class
+    if (this.formCategory == "class") {
+      id = this.classData.id;
+      col = "classes";
+    }
+    // remove prof
+    else {
+      id = this.profData.id;
+      col = "profs";
+    }
+
+    const docRef = doc(db, col, id);
+    try {
+      const result = await deleteDoc(docRef);
+      this.errorMessage = "Success";
+    }
+    catch(e) {
+      console.error(e);
+      this.errorMessage = e;
+    }
+  },
+  async handleAddOrEdit() {
     let newDoc = null;
     let col = null;
     let id = null;
@@ -207,6 +289,7 @@ methods: {
     // submit prof
     else if (this.formCategory == "prof") {
       newDoc = structuredClone(toRaw(this.profData));
+      newDoc.title = newDoc.firstname + " " + newDoc.lastname; // handle "title" field
       col = "profs"
     }
 
@@ -218,8 +301,7 @@ methods: {
     console.log(newDoc);
 
     // check for empty data
-    // if (this.isEmptyData) {
-    if (1 == 2){
+    if (this.isEmptyData) {
       const msg = "Error: Missing Fields";
       console.log(msg);
       this.errorMessage = msg;
@@ -251,8 +333,7 @@ methods: {
           this.errorMessage = e;
         }
       }
-      this.resetForm();
-    } 
+    }
   },
   /**
    * Reset The Form and Grab Latest Firestore Data
@@ -273,36 +354,22 @@ methods: {
     this.profData = {
       firstname: "",
       lastname: "",
+      title: "",
       id: ""
     };
     //get new Firestore Data
-    this.classes = await queryEntireCollection("classes");
-    const profs = await queryEntireCollection("profs");
-    // needed for v-autocomplete to work properly
-    this.profs = profs.map(p => {
-      return {
-        // i wanted to name this field "fullname" but i was getting bizarre errors...
-        // probably vuetify's fault idk
-        firstname: p.firstname + " " + p.lastname, 
-        value: p
-      }
-    }); 
+    await this.loadData();
   }
 },
-async mounted() {
-  
-  this.classes = await queryEntireCollection("classes");
-
-  const profs = await queryEntireCollection("profs");
-  // needed for v-autocomplete to work properly
-  this.profs = profs.map(p => {
-    return {
-      // i wanted to name this field "fullname" but i was getting bizarre errors...
-      // probably vuetify's fault idk
-      firstname: p.firstname + " " + p.lastname, 
-      value: p
+watch: {
+  firebaseUser(newValue, oldValue) {
+    if (newValue) {
+      this.checkForAdmin();
     }
-  }); 
+  }
+},
+mounted() {
+  this.checkForAdmin();
 }
 }
 </script>
