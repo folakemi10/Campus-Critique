@@ -57,7 +57,6 @@ watch(selected, async () => {
 
 // mounted
 onMounted(async () => {
-  console.log("Mounted");
   await loadContent();
 });
 
