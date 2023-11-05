@@ -60,8 +60,7 @@
 
 <script setup lang="ts">
 import { createUserWithEmailAndPassword, type User } from "firebase/auth";
-import { set } from "~/lib/db";
-import { auth } from "~/lib/firebase";
+import { auth, db } from "~/lib/firebase";
 
 //Object to hold user registration information
 //ref() makes anything reactive, aka anything that used to be held in data()
@@ -111,21 +110,20 @@ async function onSubmit(event: any) {
 
 //add user to USERS database
 async function addUser(firebaseUser: User, userInformation: any) {
-    await set("users",
-        {
-            uid: firebaseUser.uid,
-            firstname: userInformation.first,
-            lastname: userInformation.last,
-            email: userInformation.email,
-            username: userInformation.username,
-            admin: false
-        })
-sendEmailVerification(firebaseUser)
-.then(() => {
-    // Email verification sent... at some point should check for verification before adding to database?
-    console.log("email sent");
-  });
-;
+    const newDoc = doc(db, "users", firebaseUser.uid); // id of new document matches uid in Auth
+    const data =  {
+        uid: firebaseUser.uid,
+        firstname: userInformation.first,
+        lastname: userInformation.last,
+        email: userInformation.email,
+        username: userInformation.username,
+        admin: false
+    };
+    await setDoc(newDoc, data);
+
+    // Email Verification
+    await sendEmailVerification(firebaseUser);
+    console.log("email sent"); // Email verification sent... at some point should check for verification before adding to database?
 }
 
 function next() {
@@ -168,6 +166,7 @@ const actionCodeSettings = {
   dynamicLinkDomain: 'example.page.link'
 };
 import { getAuth, sendEmailVerification } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 
 </script>
