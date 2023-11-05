@@ -7,7 +7,6 @@
       </v-tab>
     </v-tabs>
 
-
     <v-window v-model="tab" class="bg-black">
       <v-window-item value="tab-0">
         <v-container fluid class="flex-vertical justify-center">
@@ -22,12 +21,11 @@
             <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
             <v-btn @click="addFriend">Add Friend</v-btn>
           </v-card>
-
-
-          <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true" :deletePost="deletePost"></Card>
-
-
+          <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
+            @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
         </v-container>
+
+        <EditModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
       </v-window-item>
 
 
@@ -36,8 +34,6 @@
 
         </v-container>
       </v-window-item>
-
-
     </v-window>
   </v-card>
 </template>
@@ -126,19 +122,41 @@ const addFriend = async () => {
 };
 
 
-async function deletePost(this: any, id: string) {
-  console.log("delete post");
+async function deletePost(id: string) {
+  //console.log("delete post");
   try {
     await del("posts", id);
 
     const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
-      if (postIndex !== -1) {
-        allPosts.value.splice(postIndex, 1); // Remove the card from the array
-      }
+    if (postIndex !== -1) {
+      allPosts.value.splice(postIndex, 1); // Remove the card from the array
+    }
   } catch (e) {
     console.log(e);
   }
 }
+
+const isActive = ref(false);
+const reviewToEdit = ref(null);
+
+const openEditModalForReview = (review: any) => {
+  reviewToEdit.value = review;
+  isActive.value = true;
+};
+
+const closeEditModal = (editedReview: any) => {
+  // Find and update the corresponding review in the allPosts array
+  console.log(editedReview);
+  const index = allPosts.value.findIndex((review: any) => review.id === editedReview.id);
+  console.log(index);
+  if (index !== -1) {
+    allPosts.value[index] = editedReview;
+  }
+  isActive.value = false;
+  //refetch data to update the 
+};
+
+
 </script>
 
 <!-- <script>
