@@ -19,7 +19,7 @@
 
         <v-col cols="auto">
           <div v-if="showChangeBtns">
-            <v-btn density="comfortable" @click="editPost" icon="mdi-pencil"></v-btn>
+            <v-btn density="comfortable" @click="openEditModal" icon="mdi-pencil"></v-btn>
             <v-btn density="comfortable" @click="props.deletePost(props.review?.id)" icon="mdi-delete"></v-btn>
           </div>
         </v-col>
@@ -56,6 +56,10 @@ const props = defineProps({
   review: Object,
   showChangeBtns: Boolean,
   deletePost: {
+    type: Function,
+    default: () => { },
+  },
+  openEditModal: {
     type: Function,
     default: () => { },
   },
@@ -149,12 +153,12 @@ async function getProf(prof: string, reviewedObject: string) {
   }
 }
 
-function editPost() {
-  console.log("editing post");
-}
+//Variable and Events needed to open modal
 
+const emit = defineEmits();
 
+const openEditModal = () => {
+  emit('open-edit-modal', props.review);
+};
 
 </script>
-
-<style lang="scss" scoped></style>
