@@ -85,6 +85,7 @@ let showNext = ref(false);
 
 //submit user to AUTHENTICATION and then redirect to home
 async function onSubmit(event: any) {
+    
     if(valid1.value && valid2.value){
         for(const value in Object.values(userInformation.value)){
             if(value === ''){
@@ -98,6 +99,7 @@ async function onSubmit(event: any) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const firebaseUser = userCredential.user;
+
         await addUser(firebaseUser, userInformation.value);
         await navigateTo("/");
     }
@@ -118,6 +120,12 @@ async function addUser(firebaseUser: User, userInformation: any) {
             username: userInformation.username,
             admin: false
         })
+sendEmailVerification(firebaseUser)
+.then(() => {
+    // Email verification sent... at some point should check for verification before adding to database?
+    console.log("email sent");
+  });
+;
 }
 
 function next() {
@@ -142,6 +150,24 @@ const rules = ref({
             value === userInformation.value.password || 'Password does not match',
     ],
 });
+
+const actionCodeSettings = {
+  // URL you want to redirect back to. The domain (www.example.com) for this
+  // URL must be in the authorized domains list in the Firebase Console.
+  url: 'campuscritique.vercel.app',
+  // This must be true.
+  handleCodeInApp: true,
+  iOS: {
+    bundleId: 'com.example.ios'
+  },
+  android: {
+    packageName: 'com.example.android',
+    installApp: true,
+    minimumVersion: '12'
+  },
+  dynamicLinkDomain: 'example.page.link'
+};
+import { getAuth, sendEmailVerification } from "firebase/auth";
 
 
 </script>
