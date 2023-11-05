@@ -15,7 +15,7 @@
   <v-container v-if="authenticated" class="flex-vertical justify-center">
     <Search />
     <ClientOnly>
-      <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+      <Card v-for="(review, index) in allPosts" :key="index" :review="review" :showChangeBtns="false"></Card>
     </ClientOnly>
   </v-container>
 </template>
@@ -36,7 +36,7 @@ const selected = ref();
 
 // methods
 async function loadContent() {
-  console.log(firebaseUser.value);
+  //console.log(firebaseUser.value);
   if (firebaseUser.value != null) {
     console.log("User exists, Loading Data");
 

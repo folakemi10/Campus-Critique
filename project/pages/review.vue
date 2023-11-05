@@ -56,6 +56,15 @@ const selectedProf = ref();
 
 const valid = ref();
 
+//check user auth + userId
+const firebaseUser = useFirebaseUser();
+const userId = firebaseUser.value?.uid;
+
+const reviewedObject = ref('');
+const reviewedObjectId = String(useRoute().query.id);
+const reviewedObjectName = await getObject(reviewedObjectId);
+
+
 onMounted(async () => {
   allCourses.value = await queryEntireCollection('classes');
   const professorsRef = await queryEntireCollection('profs');
@@ -72,29 +81,23 @@ onMounted(async () => {
 
 //functions to watch the input of the autocompletes
 watch(selectedClass, async () => {
-  review.value.class = selectedClass.value.id
+  review.value.class = selectedClass.value.id;
+  review.value.professor = reviewedObjectId;
   console.log(review.value);
 })
 
 watch(selectedProf, async () => {
-  review.value.professor = selectedProf.value.id
+  review.value.professor = selectedProf.value.id;
+  review.value.class = reviewedObjectId;
   console.log(review.value);
 })
 
 
-
-
-//check user auth + userId
-const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value?.uid;
-
-let reviewedObject = ref('');
-
 const review = ref({
   uid: userId,
-  reviewedObject: reviewedObject,
-  class: null,
-  professor: null,
+  reviewedObject: reviewedObject.value,
+  class: '',
+  professor: '',
   rating: 0,
   textReview: '',
 })
@@ -117,8 +120,7 @@ definePageMeta({
 });
 
 
-const reviewedObjectId = String(useRoute().query.id);
-const reviewedObjectName = await getObject(reviewedObjectId);
+
 
 
 async function getObject(id: string) {

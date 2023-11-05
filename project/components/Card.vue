@@ -1,7 +1,7 @@
 <template>
   <v-card class="mx-10	my-10 ">
     <v-card-item>
-      <v-row align-items="center">
+      <v-row align-items="start">
         <v-col cols="auto">
           <!-- User who made the post -->
           {{ username }}
@@ -12,6 +12,15 @@
             <v-rating :model-value="review?.rating" color="amber" density="compact" half-increments readonly
               size="small"></v-rating>
             <v-card-subtitle class="ml-2">{{ review?.rating }}</v-card-subtitle>
+          </div>
+        </v-col>
+
+        <v-spacer></v-spacer>
+
+        <v-col cols="auto">
+          <div v-if="showChangeBtns">
+            <v-btn density="comfortable" @click="editPost" icon="mdi-pencil"></v-btn>
+            <v-btn density="comfortable" @click="props.deletePost(props.review?.id)" icon="mdi-delete"></v-btn>
           </div>
         </v-col>
       </v-row>
@@ -39,17 +48,23 @@
 
 <script setup lang="ts" >
 
+import { queryCollectionByField, del } from '~/lib/db';
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { db } from '~/lib/firebase';
+
 const props = defineProps({
   review: Object,
+  showChangeBtns: Boolean,
+  deletePost: {
+    type: Function,
+    default: () => { },
+  },
 });
 
 const username = await getUsername(props.review?.uid);
 const course = await getCourse(props.review?.class, props.review?.reviewedObject);
 const prof = await getProf(props.review?.professor, props.review?.reviewedObject);
 
-import { queryCollectionByField } from '~/lib/db';
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { db } from '~/lib/firebase';
 
 async function getUsername(uid: string) {
   const doc = await queryCollectionByField("users", "uid", uid);
@@ -133,6 +148,12 @@ async function getProf(prof: string, reviewedObject: string) {
     }
   }
 }
+
+function editPost() {
+  console.log("editing post");
+}
+
+
 
 </script>
 

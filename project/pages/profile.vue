@@ -24,7 +24,7 @@
           </v-card>
 
 
-          <Card v-for="(review, index) in allPosts" :key="index" :review="review"></Card>
+          <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true" :deletePost="deletePost"></Card>
 
 
         </v-container>
@@ -33,7 +33,7 @@
 
       <v-window-item value="tab-1">
         <v-container fluid>
-          <Calendar />
+
         </v-container>
       </v-window-item>
 
@@ -42,15 +42,8 @@
   </v-card>
 </template>
 
-
-
-
-
-
-
-
 <script setup lang="ts">
-import { queryCollectionByField } from '~/lib/db';
+import { queryCollectionByField, del } from '~/lib/db';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
@@ -59,25 +52,16 @@ import { addDoc } from "firebase/firestore";
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
 
-
 const allPosts = ref();
 const userName = ref();
 
 
-
-
 onMounted(async () => {
-  //console.log('Entering onMounted hook');
-
-
   if (userId) {
     allPosts.value = await queryCollectionByField("posts", "uid", userId);
   } else {
     console.log('userId does not exist');
   }
-
-
-  // console.log('Exiting onMounted hook');
 });
 
 
@@ -101,65 +85,61 @@ definePageMeta({
   },
 });
 
-
-
-
 //Control the sections of the profile page
 const tab = ref('tab-0');
 
-
-
-
 const tabItems = [
-  'Posts', 'Schedule'
+  'Posts', 'Saved Courses'
 ];
 
 
 //code for friends
 const newFriendEmail = ref('');
- 
-
-
-
 
 const addFriend = async () => {
-    // Assuming you have a "friends" collection in Firebase Firestore
-    try {
-      const friendsRef = collection(db, "friends");
- 
-      // Check if the friend's email exists in the "users" collection
-      const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
-      const userQuerySnapshot = await getDocs(userQuery);
-      if (!userQuerySnapshot.empty) {
-        const friendDoc = userQuerySnapshot.docs[0];
-        const friendData = friendDoc.data();
- 
-        // Add the friend's information to the "friends" collection
-        await addDoc(friendsRef, {
-          userId: userId,
-          friendId: friendData.uid,
-          friendName: `${friendData.firstname} ${friendData.lastname}`,
-        });
- 
-        // Clear the input field
-        newFriendEmail.value = '';
-      } else {
-        console.log("Friend not found with that email.");
-      }
-    } catch (error) {
-      console.error("Error adding friend:", error);
+  // Assuming you have a "friends" collection in Firebase Firestore
+  try {
+    const friendsRef = collection(db, "friends");
+
+    // Check if the friend's email exists in the "users" collection
+    const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
+    const userQuerySnapshot = await getDocs(userQuery);
+    if (!userQuerySnapshot.empty) {
+      const friendDoc = userQuerySnapshot.docs[0];
+      const friendData = friendDoc.data();
+
+      // Add the friend's information to the "friends" collection
+      await addDoc(friendsRef, {
+        userId: userId,
+        friendId: friendData.uid,
+        friendName: `${friendData.firstname} ${friendData.lastname}`,
+      });
+
+      // Clear the input field
+      newFriendEmail.value = '';
+    } else {
+      console.log("Friend not found with that email.");
     }
-  };
+  } catch (error) {
+    console.error("Error adding friend:", error);
+  }
+};
+
+
+async function deletePost(this: any, id: string) {
+  console.log("delete post");
+  try {
+    await del("posts", id);
+
+    const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
+      if (postIndex !== -1) {
+        allPosts.value.splice(postIndex, 1); // Remove the card from the array
+      }
+  } catch (e) {
+    console.log(e);
+  }
+}
 </script>
-
-
-<style lang="scss" scoped>
-
-
-</style>
-
-
-
 
 <!-- <script>
 import { queryCollectionByField } from "~/lib/db"; // Replace with your Firebase package import
