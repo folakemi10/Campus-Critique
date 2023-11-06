@@ -4,11 +4,16 @@
   <v-container>
 
     <v-card>
+
       <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
       <v-card-title>{{ averageRating ? averageRating : ''}} / 5</v-card-title>
       <v-card-actions>
         <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
       </v-card-actions>
+
+      <h1>{{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
+      <h1>{{ ratingDisplay(calculateAverage()) }}</h1>
+
     </v-card>
 
     <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
@@ -42,7 +47,7 @@ watch(firebaseUser, (newValue) => {
 // Fetch specific posts and current object name
 onMounted(async () => {
   //Pretty bad and convoluted way to properly fetch specific posts, works but may need to be fixed later
-  let classObjects = await queryCollectionByField('posts', 'class', reviewedObjectId);
+  /*let classObjects = await queryCollectionByField('posts', 'class', reviewedObjectId);
   let profObjects = await queryCollectionByField('posts', 'professor', reviewedObjectId);
 
   if (classObjects.length > 0) {
@@ -53,8 +58,22 @@ onMounted(async () => {
     specificPosts.value = profObjects.filter((post: any) => {
       return post.reviewedObject === 'professor';
     });
+  }*/
+
+  const courseDocRef = doc(db, 'classes', reviewedObjectId);
+  const profDocRef = doc(db, 'profs', reviewedObjectId);
+
+  const courseDoc = await getDoc(courseDocRef);
+  const profDoc = await getDoc(profDocRef);
+
+  if (courseDoc.exists()) {
+    specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
+  }
+  if (profDoc.exists()) {
+    specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
   }
 
+  
   currentObjectName.value = await getObject(reviewedObjectId);
 
 });
@@ -83,6 +102,31 @@ const averageRating = computed(() => {
   });
   return total/specificPosts.value.length;
 });
+
+const calculateAverage = (): number => {
+  if (specificPosts.value.length === 0) {
+    return -1; // Return 0 if the array is empty to avoid division by zero.
+  }
+
+  let sum = 0;
+
+  for (const post of specificPosts.value) {
+    if (post.hasOwnProperty("rating")) {
+      sum += post.rating;
+    }
+  }
+
+  const average = sum / specificPosts.value.length;
+  return average;
+};
+
+const ratingDisplay = (rating: number): String => {
+  if (rating === -1) {
+    return "Overall Rating: No reviews yet"; // Return 0 if the array is empty to avoid division by zero.
+  }
+  return "Overall Rating: "+ rating.toFixed(1) + " / 5";
+};
+
 
 // // Determines if only one post or all should be displayed
 // const displayedPosts = computed(() => {

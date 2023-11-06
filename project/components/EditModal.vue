@@ -38,7 +38,7 @@ const saveChanges = () => {
     emit('close-edit-modal', editedReview.value);
 };
 
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 
 async function updateDocument() {
@@ -46,7 +46,8 @@ async function updateDocument() {
         const docRef = doc(db, "posts", props.reviewToEdit.id);
         await updateDoc(docRef, {
             rating: editedReview.value.rating,
-            textReview: editedReview.value.textReview
+            textReview: editedReview.value.textReview,
+            modifiedAt: serverTimestamp()
         });
     }
     catch (e) {
