@@ -5,7 +5,7 @@
     <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
     <v-card>
       <h1>{{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
-      <h1>{{ calculateAverage }}</h1>
+      <h1>{{ ratingDisplay(calculateAverage()) }}</h1>
     </v-card>
 
     <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
@@ -37,7 +37,20 @@ watch(firebaseUser, (newValue) => {
 
 // Fetch specific posts and current object name
 onMounted(async () => {
-  specificPosts.value = await queryCollectionByField('posts', 'reviewedObject', reviewedObjectId);
+  const courseDocRef = doc(db, 'classes', reviewedObjectId);
+  const profDocRef = doc(db, 'profs', reviewedObjectId);
+
+  const courseDoc = await getDoc(courseDocRef);
+  const profDoc = await getDoc(profDocRef);
+
+  if (courseDoc.exists()) {
+    specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
+  }
+  if (profDoc.exists()) {
+    specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
+  }
+
+  
   currentObjectName.value = await getObject(reviewedObjectId);
 
 });
@@ -61,7 +74,7 @@ async function getObject(id: string) {
 
 const calculateAverage = (): number => {
   if (specificPosts.value.length === 0) {
-    return 0; // Return 0 if the array is empty to avoid division by zero.
+    return -1; // Return 0 if the array is empty to avoid division by zero.
   }
 
   let sum = 0;
@@ -76,7 +89,12 @@ const calculateAverage = (): number => {
   return average;
 };
 
-
+const ratingDisplay = (rating: number): String => {
+  if (rating === -1) {
+    return "Overall Rating: No reviews yet"; // Return 0 if the array is empty to avoid division by zero.
+  }
+  return "Overall Rating: "+ rating.toFixed(1) + " / 5";
+};
 
 
 // // Determines if only one post or all should be displayed
