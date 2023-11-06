@@ -13,6 +13,8 @@ import {
   query,
   where,
   setDoc,
+  getAggregateFromServer,
+  average,
   collectionGroup,
   Timestamp,
 } from "firebase/firestore";
@@ -65,6 +67,16 @@ export async function add(col: string, document: Object) {
   const docRef = await addDoc(colRef, document);
 
   return docRef;
+}
+
+export async function getAverage(col: string, conditionKey: string, conditionValue: string, averageObject: string) {
+  const colRef = collection(db, col);
+  const q = query(colRef, where(conditionKey, "==", conditionValue));
+  const snapshot = await getAggregateFromServer(q, {
+    avg: average(averageObject),
+  });
+
+  return snapshot.data().avg;
 }
 
 export async function del(col: string, id: string) {

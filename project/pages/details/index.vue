@@ -2,10 +2,18 @@
   <GlobalNav />
   <!-- If user is logged in, display all the posts for the class -->
   <v-container>
-    <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
+
     <v-card>
+
+      <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
+      <v-card-title>{{ averageRating ? averageRating : ''}} / 5</v-card-title>
+      <v-card-actions>
+        <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
+      </v-card-actions>
+
       <h1>{{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
       <h1>{{ ratingDisplay(calculateAverage()) }}</h1>
+
     </v-card>
 
     <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
@@ -28,6 +36,7 @@ const firebaseUser = useFirebaseUser();
 const currentObjectName = ref<null | string>(null);
 const specificPosts = ref<any[]>([]);
 
+
 // Use watch to watch the user variable
 watch(firebaseUser, (newValue) => {
   if (newValue) {
@@ -37,6 +46,20 @@ watch(firebaseUser, (newValue) => {
 
 // Fetch specific posts and current object name
 onMounted(async () => {
+  //Pretty bad and convoluted way to properly fetch specific posts, works but may need to be fixed later
+  /*let classObjects = await queryCollectionByField('posts', 'class', reviewedObjectId);
+  let profObjects = await queryCollectionByField('posts', 'professor', reviewedObjectId);
+
+  if (classObjects.length > 0) {
+    specificPosts.value = classObjects.filter((post: any) => {
+      return post.reviewedObject === 'course';
+    });
+  } else {
+    specificPosts.value = profObjects.filter((post: any) => {
+      return post.reviewedObject === 'professor';
+    });
+  }*/
+
   const courseDocRef = doc(db, 'classes', reviewedObjectId);
   const profDocRef = doc(db, 'profs', reviewedObjectId);
 
@@ -71,6 +94,14 @@ async function getObject(id: string) {
   }
   else return id;
 }
+
+const averageRating = computed(() => {
+  let total = 0;
+  specificPosts.value.forEach((post: any) => {
+    total += post.rating;
+  });
+  return total/specificPosts.value.length;
+});
 
 const calculateAverage = (): number => {
   if (specificPosts.value.length === 0) {

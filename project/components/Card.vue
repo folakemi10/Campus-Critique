@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-10	my-10 ">
+  <v-card class="my-10 min-w-full max-w-xl">
     <v-card-item>
       <v-row align-items="start">
         <v-col cols="auto">
