@@ -59,7 +59,8 @@
 </template>
 
 <script setup lang="ts">
-import { createUserWithEmailAndPassword, type User } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, type User } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "~/lib/firebase";
 
 //Object to hold user registration information
@@ -117,7 +118,8 @@ async function addUser(firebaseUser: User, userInformation: any) {
         lastname: userInformation.last,
         email: userInformation.email,
         username: userInformation.username,
-        admin: false
+        admin: false,
+        createdAt: serverTimestamp()
     };
     await setDoc(newDoc, data);
 
@@ -165,8 +167,5 @@ const actionCodeSettings = {
   },
   dynamicLinkDomain: 'example.page.link'
 };
-import { getAuth, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-
 
 </script>
