@@ -9,8 +9,8 @@
 
     <v-window v-model="tab" class="bg-black">
       <v-window-item value="tab-0">
-        <v-container fluid class="flex-vertical justify-center">
-          <v-card class="mx-10  my-10 ">
+        <v-container class="flex flex-col items-center justify-center">
+          <v-card class="min-w-full max-w-xl ">
             <v-card-text>
               <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
               <div class="text-lg mb-4">
@@ -21,8 +21,10 @@
             <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
             <v-btn @click="addFriend">Add Friend</v-btn>
           </v-card>
+
           <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
             @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
+
         </v-container>
 
         <EditModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
