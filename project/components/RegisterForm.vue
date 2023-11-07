@@ -54,6 +54,10 @@
                     <v-icon icon="mdi-chevron-right" end></v-icon>
                 </v-btn>
             </v-card-actions>
+            <v-alert type="warning" outlined>
+                    Please verify your email address before logging in.
+                    
+                </v-alert>
         </v-form>
     </v-card>
 </template>
@@ -72,6 +76,13 @@ const userInformation = ref({
     email: '',
     password: '',
 })
+
+
+// Add a computed property to check if the email is verified
+const emailNotVerified = computed(() => {
+    const firebaseUser = useFirebaseUser();
+    return firebaseUser.value !== null && !firebaseUser.value.emailVerified;
+});
 
 //validation variable for form
 let valid1 = ref();
@@ -93,15 +104,15 @@ async function onSubmit(event: any) {
             }
         }
     }
-    
     const email = userInformation.value.email;
     const password = userInformation.value.password;
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const firebaseUser = userCredential.user;
+        
 
         await addUser(firebaseUser, userInformation.value);
-        await navigateTo("/");
+        await navigateTo("/login");
     }
     catch (e: any) {
         console.error(e);
