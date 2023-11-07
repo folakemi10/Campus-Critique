@@ -102,10 +102,6 @@ const ratingDisplay = (rating: number): String => {
 };
 
 
-// // Determines if only one post or all should be displayed
-// const displayedPosts = computed(() => {
-//   return firebaseUser.value ? specificPosts.value : (specificPosts.value.length > 0 ? [specificPosts.value[0]] : []);
-// });
 </script>
 
 
