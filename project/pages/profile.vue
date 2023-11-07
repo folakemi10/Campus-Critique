@@ -19,7 +19,7 @@
               <LogoutBtn />
             </v-card-text>
             <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-            <v-btn @click="addFriend">Add Friend</v-btn>
+            <v-btn @click="inviteFriend">Invite Friend</v-btn>
           </v-card>
 
           <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
@@ -36,16 +36,16 @@
 
         </v-container>
       </v-window-item>
+
     </v-window>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { queryCollectionByField, del } from '~/lib/db';
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs, getDoc, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
-import { addDoc } from "firebase/firestore";
-
+import { ref } from 'vue';
 
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
@@ -91,39 +91,6 @@ const tabItems = [
 ];
 
 
-//code for friends
-const newFriendEmail = ref('');
-
-const addFriend = async () => {
-  // Assuming you have a "friends" collection in Firebase Firestore
-  try {
-    const friendsRef = collection(db, "friends");
-
-    // Check if the friend's email exists in the "users" collection
-    const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
-    const userQuerySnapshot = await getDocs(userQuery);
-    if (!userQuerySnapshot.empty) {
-      const friendDoc = userQuerySnapshot.docs[0];
-      const friendData = friendDoc.data();
-
-      // Add the friend's information to the "friends" collection
-      await addDoc(friendsRef, {
-        userId: userId,
-        friendId: friendData.uid,
-        friendName: `${friendData.firstname} ${friendData.lastname}`,
-      });
-
-      // Clear the input field
-      newFriendEmail.value = '';
-    } else {
-      console.log("Friend not found with that email.");
-    }
-  } catch (error) {
-    console.error("Error adding friend:", error);
-  }
-};
-
-
 async function deletePost(id: string) {
   //console.log("delete post");
   try {
@@ -161,36 +128,3 @@ const closeEditModal = (editedReview: any) => {
 
 </script>
 
-<!-- <script>
-import { queryCollectionByField } from "~/lib/db"; // Replace with your Firebase package import
-
-
-export default {
-  data() {
-    return {
-      allPosts: [],
-      firebaseUser: useFirebaseUser().value,
-    }
-  },
-  async mounted() {
-    this.allPosts = await queryCollectionByField("posts", "uid", this.firebaseUser.uid );
-
-
-    return {
-      allPosts: [],
-      firebaseUser: null
-    }
-  },
-  computed: {
-    getUsername() {
-      const firebaseUser = useFirebaseUser();
-    //   if (!firebaseUser.value.displayName) {
-    //     return "Bad Registeration. Delete user from database and register again";
-    //   }
-      const username = "test";
-      return username;
-    }
-  }
-}
-</script>
-   -->

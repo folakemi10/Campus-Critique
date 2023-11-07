@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { average, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { ref, onMounted, computed, watch } from 'vue';
 import { db } from '~/lib/firebase';
 import { queryCollectionByField } from '~/lib/db';
