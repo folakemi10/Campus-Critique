@@ -16,8 +16,9 @@
  
   <script setup lang="ts">
   import { ref, onMounted } from 'vue';
-  import { getDocs, query, where, collection } from 'firebase/firestore';
+  import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
   import { db } from '~/lib/firebase';
+  import { queryCollectionByField } from '~/lib/db';
  
   const { friend } = defineProps(['friend']);
  
@@ -27,9 +28,15 @@
   onMounted(async () => {
     // Fetch the friend's reviews from Firestore based on their ID
     if (friend && friend.friendId) {
-      const reviewsQuery = query(collection(db, 'reviews'), where('uid', '==', friend.friendId));
-      const reviewsQuerySnapshot = await getDocs(reviewsQuery);
-      friendReviews.value = reviewsQuerySnapshot.docs.map((doc) => doc.data());
+      console.log(friend.friendId);
+      const docFriend = doc(db, "users", friend.friendId);
+      const docSnap = await getDoc(docFriend);
+      
+      const frienduid = docSnap.data().uid;
+
+      friendReviews.value = await queryCollectionByField('posts', 'uid', frienduid);
+      //const reviewsQuerySnapshot = await getDocs(reviewsQuery);
+      //friendReviews.value = reviewsQuerySnapshot.docs.map((doc) => doc.data());
     }
   });
   </script>
