@@ -16,10 +16,18 @@
                             <v-btn @click="inviteFriend">Invite Friend</v-btn>
                         </v-card-text>
                     </v-card>
-                    <h1> Your Friends </h1>
-                    <v-card v-for="friend in invitedFriends" :key="friend.id" class="friend-card">
-                        <v-card-title>{{ friend.username}}</v-card-title>
-                    </v-card>
+                    <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
+
+                    <v-row>
+                        <v-col v-for="friend in invitedFriends" :key="friend.id">
+                            <v-card class="my-10 min-w-full max-w-xl">
+                                <v-card-text>
+                                    <v-card-title>{{ friend.username }}</v-card-title>
+                                </v-card-text>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+
 
                 </v-container>
             </v-window-item>
@@ -27,6 +35,7 @@
 
             <v-window-item value="tab-1">
                 <v-container fluid>
+                    <h1 class="text-3xl font-semibold mb-4"> Your Invites </h1>
                     <v-card v-for="invitation in invitations" :key="invitation.id" class="mb-4">
                         <v-card-title>{{ invitation.senderName }} is trying to become your friend</v-card-title>
                         <v-card-actions>
@@ -97,8 +106,7 @@ const inviteFriend = async () => {
             return;
         }
 
-        //TODO: change for username and fix firestore rules
-
+        //TODO: change for username and fix firestore rule
 
         // Check if the friend's email exists in the "users" collection
         //const userQuery = query(usersRef, where('username', '==', newFriendUsername));
@@ -130,7 +138,6 @@ const inviteFriend = async () => {
                 await setDoc(invitationDoc, {
                     senderId: userId,
                     receiverId: friendData.uid,
-                    senderName: userName.value.username,
                     status: 'pending'
                 });
 
@@ -241,7 +248,6 @@ const combineFriends = async () => {
     }
 
 };
-console.log("m"+invitedFriends.value);
 //console.log(invitedFriends);
 
 onMounted(combineFriends);

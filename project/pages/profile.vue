@@ -18,8 +18,6 @@
               </div>
               <LogoutBtn />
             </v-card-text>
-            <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-            <v-btn @click="inviteFriend">Invite Friend</v-btn>
           </v-card>
 
           <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
