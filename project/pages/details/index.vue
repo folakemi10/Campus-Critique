@@ -76,7 +76,6 @@ async function getObject(id: string) {
   else return id;
 }
 
-
 const calculateAverage = (): number => {
   if (specificPosts.value.length === 0) {
     return -1; // Return 0 if the array is empty to avoid division by zero.
@@ -100,7 +99,6 @@ const ratingDisplay = (rating: number): String => {
   }
   return "Overall Rating: "+ rating.toFixed(1) + " / 5";
 };
-
 
 </script>
 
