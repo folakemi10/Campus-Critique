@@ -86,7 +86,7 @@ async function onSubmit(event) {
             //sendEmailVerification(firebaseUser);
             console.log("Email is not verified. Please verify your email and refresh the page.");
         }
-        //await navigateTo("/");
+        await navigateTo("/");
     } else {
         console.log(firebaseUser.value);
     }
