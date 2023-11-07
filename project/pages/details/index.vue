@@ -42,7 +42,6 @@ watch(firebaseUser, (newValue) => {
 
 // Fetch specific posts and current object name
 onMounted(async () => {
-
   const courseDocRef = doc(db, 'classes', reviewedObjectId);
   const profDocRef = doc(db, 'profs', reviewedObjectId);
 
@@ -55,7 +54,6 @@ onMounted(async () => {
   if (profDoc.exists()) {
     specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
   }
-
   
   currentObjectName.value = await getObject(reviewedObjectId);
 
