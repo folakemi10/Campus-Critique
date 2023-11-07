@@ -20,7 +20,12 @@
                         Log In
                         <v-icon icon="mdi-chevron-right" end></v-icon>
                     </v-btn>
+
                 </v-card-actions>
+                 <v-alert v-if="emailNotVerified" type="error" outlined>
+                    Email is not verified. Please verify your email and refresh the page.
+                    <v-btn @click="sendVerificationEmail">Resend Verification Email</v-btn>
+                </v-alert>
             </v-form>
         </v-card>
 
@@ -29,6 +34,25 @@
 </template>
 
 <script setup>
+
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+
+const actionCodeSettings = {
+  // URL you want to redirect back to. The domain (www.example.com) for this
+  // URL must be in the authorized domains list in the Firebase Console.
+  url: 'campuscritique.vercel.app',
+  // This must be true.
+  handleCodeInApp: true,
+  iOS: {
+    bundleId: 'com.example.ios'
+  },
+  android: {
+    packageName: 'com.example.android',
+    installApp: true,
+    minimumVersion: '12'
+  },
+  dynamicLinkDomain: 'example.page.link'
+};
 
 const userLogin = ref({
     email: "",
@@ -54,9 +78,36 @@ async function onSubmit(event) {
     const firebaseUser = useFirebaseUser();
 
     if (firebaseUser.value !== null && valid.value) {
-        await navigateTo("/");
+        // Check if the user's email is verified
+        if (firebaseUser.value.emailVerified) {
+            await navigateTo("/");
+        } else {
+            // Display an error message or redirect to a page to request email verification
+            //sendEmailVerification(firebaseUser);
+            console.log("Email is not verified. Please verify your email and refresh the page.");
+        }
+        //await navigateTo("/");
     } else {
         console.log(firebaseUser.value);
     }
 }
+
+const emailNotVerified = computed(() => {
+    const firebaseUser = useFirebaseUser();
+    return firebaseUser.value !== null && !firebaseUser.value.emailVerified;
+});
+
+async function sendVerificationEmail() {
+    const firebaseUser = useFirebaseUser();
+
+    if (firebaseUser.value !== null) {
+        try {
+            await sendEmailVerification(firebaseUser.value);
+            console.log("Verification email sent. Please check your inbox.");
+        } catch (error) {
+            console.error("Error sending verification email:", error);
+        }
+    }
+}
+
 </script>
