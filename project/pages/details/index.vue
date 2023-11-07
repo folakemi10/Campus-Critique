@@ -6,14 +6,10 @@
     <v-card>
 
       <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
-      <v-card-title>{{ averageRating ? averageRating : ''}} / 5</v-card-title>
+      <v-card-title>{{ ratingDisplay(calculateAverage()) }}</v-card-title>
       <v-card-actions>
         <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
       </v-card-actions>
-
-      <h1>{{ currentObjectName ? currentObjectName : 'Loading...' }}</h1>
-      <h1>{{ ratingDisplay(calculateAverage()) }}</h1>
-
     </v-card>
 
     <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
@@ -46,20 +42,6 @@ watch(firebaseUser, (newValue) => {
 
 // Fetch specific posts and current object name
 onMounted(async () => {
-  //Pretty bad and convoluted way to properly fetch specific posts, works but may need to be fixed later
-  /*let classObjects = await queryCollectionByField('posts', 'class', reviewedObjectId);
-  let profObjects = await queryCollectionByField('posts', 'professor', reviewedObjectId);
-
-  if (classObjects.length > 0) {
-    specificPosts.value = classObjects.filter((post: any) => {
-      return post.reviewedObject === 'course';
-    });
-  } else {
-    specificPosts.value = profObjects.filter((post: any) => {
-      return post.reviewedObject === 'professor';
-    });
-  }*/
-
   const courseDocRef = doc(db, 'classes', reviewedObjectId);
   const profDocRef = doc(db, 'profs', reviewedObjectId);
 
@@ -72,7 +54,6 @@ onMounted(async () => {
   if (profDoc.exists()) {
     specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
   }
-
   
   currentObjectName.value = await getObject(reviewedObjectId);
 
@@ -95,13 +76,6 @@ async function getObject(id: string) {
   else return id;
 }
 
-const averageRating = computed(() => {
-  let total = 0;
-  specificPosts.value.forEach((post: any) => {
-    total += post.rating;
-  });
-  return total/specificPosts.value.length;
-});
 
 const calculateAverage = (): number => {
   if (specificPosts.value.length === 0) {
@@ -128,10 +102,6 @@ const ratingDisplay = (rating: number): String => {
 };
 
 
-// // Determines if only one post or all should be displayed
-// const displayedPosts = computed(() => {
-//   return firebaseUser.value ? specificPosts.value : (specificPosts.value.length > 0 ? [specificPosts.value[0]] : []);
-// });
 </script>
 
 
