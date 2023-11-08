@@ -7,7 +7,7 @@
       </v-tab>
     </v-tabs>
 
-    <v-window v-model="tab" class="bg-black">
+    <v-window v-model="tab">
       <v-window-item value="tab-0">
         <v-container class="flex flex-col items-center justify-center">
 
@@ -19,10 +19,13 @@
               <v-btn @click="inviteFriend">Invite Friend</v-btn>
             </v-card-text>
           </v-card>
-
-
         </v-container>
 
+        <v-card v-for="friend in invitedFriends" :key="friend.id" class="my-10 min-w-full max-w-xl">
+          <v-card-text>
+           {{ friend.username }}
+          </v-card-text>
+        </v-card>
       </v-window-item>
 
 
@@ -42,6 +45,8 @@
       </v-window-item>
 
     </v-window>
+
+
   </v-card>
 </template>
   
@@ -177,40 +182,11 @@ onMounted(async () => {
 });
 
 
-async function acceptInvitation(invitation: any) {
-  try {
-    // Update the status of the invitation to 'accepted'
-    const invitationDoc = doc(invitationsRef, invitation.id);
-    await updateDoc(invitationDoc, { status: 'accepted' });
-
-    // Remove the accepted invitation from the array
-    invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-  } catch (error) {
-    console.error('Error accepting invitation:', error);
-  }
-}
-
-async function declineInvitation(invitation: any) {
-  try {
-    // Delete the invitation document from the collection
-    const invitationDoc = doc(invitationsRef, invitation.id);
-    await deleteDoc(invitationDoc);
 
 
-    console.log(invitations.value + "before");
 
-    // Remove the declined invitation from the array
-    invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-    console.log(invitations.value + "after");
-  } catch (error) {
-    console.error('Error declining invitation:', error);
-  }
-}
-
-
-//display accepted friends
-
-onMounted(async () => {
+// Populate the invitations array and display accepted friends
+const combineFriends = async () => {
   if (userId) {
     // Fetch both sent and received friend invitations
     const sentInvitationsQuery = query(invitationsRef, where('senderId', '==', userId));
@@ -233,7 +209,7 @@ onMounted(async () => {
     // Combine sender and receiver IDs into one array
     const allFriendIds = [...sentFriendIds, ...receivedFriendIds];
 
-    // // Use the IDs to fetch the usernames from the 'users' collection
+    // Use the IDs to fetch the usernames from the 'users' collection
     const q = query(usersRef);
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
@@ -243,10 +219,51 @@ onMounted(async () => {
       });
     }
     invitedFriends.value = allFriendIds.filter((friendId) => userDataMap[friendId]).map((friendId) => ({ id: friendId, username: userDataMap[friendId] }));
-    //console.log(invitedFriends.value);
+    console.log("inv"+ invitedFriends.value);
   }
 
+};
+// Display accepted friends when the component is mounted
+onMounted(async () => {
+  // Populate the invitations array and display accepted friends
+  await combineFriends();
 });
+
+// Accept an invitation and update the friends list
+async function acceptInvitation(invitation: any) {
+  try {
+    // Update the status of the invitation to 'accepted'
+    const invitationDoc = doc(invitationsRef, invitation.id);
+    await updateDoc(invitationDoc, { status: 'accepted' });
+
+    // Call combineFriends to update the friends list with the newly accepted friend
+    await combineFriends();
+
+    // Remove the accepted invitation from the array
+    invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
+    console.log("val" + invitations.value);
+  } catch (error) {
+    console.error('Error accepting invitation:', error);
+  }
+}
+
+async function declineInvitation(invitation: any) {
+  try {
+    // Delete the invitation document from the collection
+    const invitationDoc = doc(invitationsRef, invitation.id);
+    await deleteDoc(invitationDoc);
+
+
+    console.log(invitations.value + "before");
+    // Remove the declined invitation from the array
+    invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
+    console.log(invitations.value + "after");
+  } catch (error) {
+    console.error('Error declining invitation:', error);
+  }
+}
+
+
 
 
 </script>
