@@ -54,10 +54,9 @@
                     <v-icon icon="mdi-chevron-right" end></v-icon>
                 </v-btn>
             </v-card-actions>
-            <v-alert type="warning" outlined>
-                    Please verify your email address before logging in.
-                    
-                </v-alert>
+            <!-- <v-alert type="warning" outlined>
+                Please verify your email address before logging in.
+            </v-alert> -->
         </v-form>
     </v-card>
 </template>
@@ -96,10 +95,10 @@ let showNext = ref(false);
 
 //submit user to AUTHENTICATION and then redirect to home
 async function onSubmit(event: any) {
-    
-    if(valid1.value && valid2.value){
-        for(const value in Object.values(userInformation.value)){
-            if(value === ''){
+
+    if (valid1.value && valid2.value) {
+        for (const value in Object.values(userInformation.value)) {
+            if (value === '') {
                 alert("not filled");
             }
         }
@@ -109,7 +108,7 @@ async function onSubmit(event: any) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const firebaseUser = userCredential.user;
-        
+
 
         await addUser(firebaseUser, userInformation.value);
         await navigateTo("/login");
@@ -123,7 +122,7 @@ async function onSubmit(event: any) {
 //add user to USERS database
 async function addUser(firebaseUser: User, userInformation: any) {
     const newDoc = doc(db, "users", firebaseUser.uid); // id of new document matches uid in Auth
-    const data =  {
+    const data = {
         uid: firebaseUser.uid,
         firstname: userInformation.first,
         lastname: userInformation.last,
@@ -163,20 +162,20 @@ const rules = ref({
 });
 
 const actionCodeSettings = {
-  // URL you want to redirect back to. The domain (www.example.com) for this
-  // URL must be in the authorized domains list in the Firebase Console.
-  url: 'campuscritique.vercel.app',
-  // This must be true.
-  handleCodeInApp: true,
-  iOS: {
-    bundleId: 'com.example.ios'
-  },
-  android: {
-    packageName: 'com.example.android',
-    installApp: true,
-    minimumVersion: '12'
-  },
-  dynamicLinkDomain: 'example.page.link'
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be in the authorized domains list in the Firebase Console.
+    url: 'campuscritique.vercel.app',
+    // This must be true.
+    handleCodeInApp: true,
+    iOS: {
+        bundleId: 'com.example.ios'
+    },
+    android: {
+        packageName: 'com.example.android',
+        installApp: true,
+        minimumVersion: '12'
+    },
+    dynamicLinkDomain: 'example.page.link'
 };
 
 </script>
