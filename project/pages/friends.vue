@@ -87,18 +87,6 @@ const tabItems = [
 
 const userDataMap: { [key: string]: string } = {};
 
-
-definePageMeta({
-  middleware: function (to, from) {
-    const user = useFirebaseUser();
-
-    if (!user.value) {
-      return navigateTo('/');
-    }
-  },
-});
-
-
 const invitationsRef = collection(db, 'friends');
 
 
@@ -263,9 +251,13 @@ async function declineInvitation(invitation: any) {
   }
 }
 
+// definePageMeta({
+//   middleware: function (to, from) {
+//     const user = useFirebaseUser();
 
-
-
+//     if (!user.value) {
+//       return navigateTo('/');
+//     }
+//   },
+// });
 </script>
-  
-<style lang="scss" scoped></style>

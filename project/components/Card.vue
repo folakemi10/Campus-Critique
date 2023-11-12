@@ -4,8 +4,9 @@
       <v-row align-items="start">
         <v-col cols="auto">
           <!-- User who made the post -->
-          {{ username }}
+          <v-card-subtitle> {{ username }} &#183; {{ formatDate(review?.modifiedAt) }} </v-card-subtitle>
         </v-col>
+
 
         <v-col cols="auto">
           <div class="d-flex">
@@ -13,6 +14,7 @@
               size="small"></v-rating>
             <v-card-subtitle class="ml-2">{{ review?.rating }}</v-card-subtitle>
           </div>
+
         </v-col>
 
         <v-spacer></v-spacer>
@@ -160,5 +162,15 @@ const emit = defineEmits();
 const openEditModal = () => {
   emit('open-edit-modal', props.review);
 };
+
+function formatDate(date: any) {
+  const jsDate = date.toDate();
+  const month = jsDate.toLocaleString('default', { month: 'short' });
+  const day = jsDate.getDate();
+  const year = jsDate.getFullYear();
+
+  return day + ' ' + month + ' ' + year;
+
+}
 
 </script>

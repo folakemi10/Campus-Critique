@@ -9,14 +9,14 @@
             </v-btn>
 
             <v-spacer></v-spacer>
-            <AvatarMenu v-if="firebaseUser"/>
+            <AvatarMenu v-if="authenticated && !loading"/>
            
             <div v-if="isAdmin">
                 <AdminBtn :button-text="'Admin'" :size="'large'" />
             </div>
 
 
-            <div v-if="!firebaseUser">
+            <div v-if="!authenticated && !loading">
                 <LoginBtn :button-text="'Login'" :size="'large'" />
                 <RegisterBtn :button-text="'Join'" :size="'large'" />
             </div>
@@ -30,16 +30,30 @@
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '~/lib/firebase';
 
+const authenticated = ref(false);
+
 
 const firebaseUser = useFirebaseUser();
 const isAdmin = ref(false);
+const loading = ref(true);
+
+onMounted(() => {
+    checkAdmin();
+});
+
+watch(firebaseUser, (newVal, oldVal) => {
+    if (newVal) {
+        checkAdmin();
+    }
+});
 
 async function checkAdmin() {
-    console.log("Checking Admin");
+    loading.value = true;
+    //console.log("Checking Admin");
     if (!firebaseUser.value) {
+        authenticated.value = false;
         return
     }
-
     const uid = firebaseUser.value?.uid as string;
     const docRef = doc(db, "users", uid);
     const docSnap = await getDoc(docRef);
@@ -49,35 +63,16 @@ async function checkAdmin() {
     }
 
     const user = docSnap.data();
-    console.log(user);
+    //console.log(user);
     if (user.admin) {
       isAdmin.value = true;
     }
     else {
       isAdmin.value = false;
     }
-    
+
+    authenticated.value = true;
+    loading.value = false;
 }
-
-watch(firebaseUser, (newVal, oldVal) => {
-    if (newVal) {
-        checkAdmin();
-    }
-});
-
-
-async function navigateToProfile() {
-    await navigateTo('/profile');
-}
-
-
-async function navigateToFriends() {
-    await navigateTo('/friends');
-}
-
-onMounted(() => {
-    checkAdmin();
-});
-
 
 </script>
