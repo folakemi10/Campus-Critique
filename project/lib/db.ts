@@ -17,6 +17,8 @@ import {
   average,
   collectionGroup,
   Timestamp,
+  orderBy,
+  type OrderByDirection,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -82,4 +84,21 @@ export async function getAverage(col: string, conditionKey: string, conditionVal
 export async function del(col: string, id: string) {
   const docRef = doc(db, col, id);
   return await deleteDoc(docRef);
+}
+
+export async function queryOrderedCollection(col: string, field: string, queryDirection?: OrderByDirection) {
+  // @ts-ignore
+  const colRef = collection(db, col);
+
+  const q = query(colRef, orderBy(field, queryDirection));
+  const querySnapshot = await getDocs(q);
+
+  const docs = Array.from(querySnapshot.docs).map((doc) => {
+    return {
+      ...doc.data(),
+      id: doc.id,
+    };
+  });
+
+  return docs;
 }

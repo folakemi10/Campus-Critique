@@ -1,8 +1,10 @@
-
 <template>
-  <GlobalNav />
-  <v-progress-circular model-value="20" indeterminate v-if="loading"></v-progress-circular>
-  <v-container v-else-if="!firebaseUser">
+  <GlobalNav class="m-4" />
+  <div class="text-center">
+    <v-progress-circular model-value="20" color="primary"  indeterminate v-if="loading"></v-progress-circular>
+  </div>
+
+  <v-container v-if="!authenticated && !loading">
     <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
       Welcome to Campus Critique!</h1>
 
@@ -11,7 +13,7 @@
     </v-btn>
   </v-container>
 
-  <v-container v-else-if="firebaseUser" class="flex-vertical justify-center">
+  <v-container v-if="authenticated && !loading" class="flex-vertical justify-center">
     <Search />
     <!-- <ClientOnly> -->
     <Card v-for="(review, index) in allPosts" :key="index" :review="review" :showChangeBtns="false"></Card>
@@ -22,11 +24,11 @@
 
   
 <script setup lang="ts">
-import { queryEntireCollection } from "~/lib/db";
+import { queryEntireCollection, queryOrderedCollection} from "~/lib/db";
 
 // data
 const firebaseUser = useFirebaseUser();
-// const authenticated = ref();
+const authenticated = ref(false);
 const loading = ref(true);
 
 const allPosts = ref();
@@ -49,17 +51,17 @@ async function loadContent() {
   if (firebaseUser.value !== null) {
     // console.log("User exists, Loading Data");
 
-    allPosts.value = await queryEntireCollection('posts');
+    allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
 
     allCourses.value = await queryEntireCollection('classes');
 
     allProfessors.value = await queryEntireCollection('profs');
 
-    //authenticated.value = true;
+    authenticated.value = true;
   }
   else {
     console.log("No User, Clearing Data");
-    //authenticated.value = false;
+    authenticated.value = false;
   }
 
   loading.value = false;
