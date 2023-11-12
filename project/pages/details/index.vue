@@ -1,6 +1,7 @@
 <template>
   <GlobalNav />
   <!-- If user is logged in, display all the posts for the class -->
+
   <v-container>
 
     <v-card>

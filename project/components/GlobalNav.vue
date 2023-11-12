@@ -9,9 +9,8 @@
             </v-btn>
 
             <v-spacer></v-spacer>
-
             <AvatarMenu v-if="firebaseUser"/>
-
+           
             <div v-if="isAdmin">
                 <AdminBtn :button-text="'Admin'" :size="'large'" />
             </div>

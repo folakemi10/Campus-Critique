@@ -10,33 +10,33 @@
         </v-radio-group> -->
       </v-card>
 
-        <v-card class="m-6" v-if="reviewedObject == 'course'">
-          <v-card-title> Which professor taught this course? </v-card-title>
-          <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
-            item-text="firstname" item-value="id" return-object></v-autocomplete>
-        </v-card>
+      <v-card class="m-6" v-if="reviewedObject == 'course'">
+        <v-card-title> Which professor taught this course? </v-card-title>
+        <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+          item-text="firstname" item-value="id" return-object></v-autocomplete>
+      </v-card>
 
 
-        <v-card class="m-6" v-if="reviewedObject == 'professor'">
-          <v-card-title>Which course did you take with this professor? </v-card-title>
-          <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
-            return-object></v-autocomplete>
-        </v-card>
+      <v-card class="m-6" v-if="reviewedObject == 'professor'">
+        <v-card-title>Which course did you take with this professor? </v-card-title>
+        <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+          return-object></v-autocomplete>
+      </v-card>
 
-        <v-card class="m-6">
-          <v-card-title>How would you rate this{{ reviewedObject == 'course' ? ' class' : ' professor' }}? </v-card-title>
-          <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
-        </v-card>
+      <v-card class="m-6">
+        <v-card-title>How would you rate this{{ reviewedObject == 'course' ? ' class' : ' professor' }}? </v-card-title>
+        <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
+      </v-card>
 
-        <v-card class="m-6">
-          <v-card-title>Write a Review: </v-card-title>
-          <v-container fluid>
-            <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
-              v-model="review.textReview"></v-textarea>
-          </v-container>
-        </v-card>
+      <v-card class="m-6">
+        <v-card-title>Write a Review: </v-card-title>
+        <v-container fluid>
+          <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
+            v-model="review.textReview"></v-textarea>
+        </v-container>
+      </v-card>
 
-        <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+      <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
 
     </v-form>
   </v-container>
@@ -64,8 +64,16 @@ const reviewedObject = ref('');
 const reviewedObjectId = String(useRoute().query.id);
 const reviewedObjectName = await getObject(reviewedObjectId);
 
+watch(firebaseUser, async () => {
+  await loadContent();
+});
 
 onMounted(async () => {
+  console.log("Mounted");
+  await loadContent();
+});
+
+async function loadContent() {
   allCourses.value = await queryEntireCollection('classes');
   const professorsRef = await queryEntireCollection('profs');
 
@@ -76,7 +84,6 @@ onMounted(async () => {
     allProfessors.value.push(doc);
   });
 }
-);
 
 
 //functions to watch the input of the autocompletes
@@ -111,15 +118,15 @@ const rules = ref({
   required: [(value: string) => !!value || "This question is required"],
 });
 
-definePageMeta({
-  middleware: function (to, from) {
-    const user = useFirebaseUser();
+// definePageMeta({
+//   middleware: function (to, from) {
+//     const user = useFirebaseUser();
 
-    if (!user.value) {
-      return navigateTo('/');
-    }
-  },
-});
+//     if (!user.value) {
+//       return navigateTo('/');
+//     }
+//   },
+// });
 
 
 
