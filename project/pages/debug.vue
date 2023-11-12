@@ -30,38 +30,51 @@
         
     </div>
 
+    <ProfilePicBtn :uid_prop="uid" />
 
 </template>
 
 
 <script lang="ts">
 import { auth_status } from '~/composables/auth';
-//import { login, logout, status } from "../lib/auth";
+import { getProfilePic } from '~/lib/storage';
 
 export default {
-
-
-    data() {
-        return {
-            email: "test@example.com",
-            password: "password",
-            user_info: ""   
-        }
+data() {
+    return {
+        email: "test@example.com",
+        password: "password",
+        user_info: "",
+        image_url: "",
+        firebaseUser: useFirebaseUser(),
+        uid: ""
+    }
+},
+methods: {
+    async submit_login() {
+        const user = await login(this.email, this.password);
+        this.user_info = JSON.stringify(user);
     },
-    methods: {
-        async submit_login() {
-            const user = await login(this.email, this.password);
-            this.user_info = JSON.stringify(user);
-        },
-        async submit_logout() {
-            const result = await logout();
-            this.user_info = JSON.stringify(result);
-        },
-        async submit_status() {
-            const user = await auth_status();
-            this.user_info = JSON.stringify(user);
+    async submit_logout() {
+        const result = await logout();
+        this.user_info = JSON.stringify(result);
+    },
+    async submit_status() {
+        const user = await auth_status();
+        this.user_info = JSON.stringify(user);
+    },
+    async get_pfp() {
+        this.image_url = await getProfilePic(this.uid);
+    }
+},
+watch: {
+    firebaseUser(newValue, oldValue) {
+        if (newValue) {
+           this.uid = this.firebaseUser?.uid as string;
+           this.get_pfp();
         }
     }
+}
 }
 </script>
   
