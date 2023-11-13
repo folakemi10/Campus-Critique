@@ -1,5 +1,5 @@
 <template>
-  <GlobalNav />
+  <GlobalNav :isAuthenticated='authenticated' />
   <v-card>
     <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
       <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
@@ -23,7 +23,7 @@
 
         <v-card v-for="friend in invitedFriends" :key="friend.id" class="my-10 min-w-full max-w-xl">
           <v-card-text>
-           {{ friend.username }}
+            {{ friend.username }}
           </v-card-text>
         </v-card>
       </v-window-item>
@@ -60,6 +60,8 @@ import { ref } from 'vue';
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
 
+const authenticated = firebaseUser ? true : false;
+
 
 const usersRef = collection(db, "users");
 
@@ -70,12 +72,15 @@ const newFriendEmail = ref('');
 let invitedFriends = ref<any[]>([]);
 const user = ref();
 
-const q = query(usersRef, where("uid", "==", userId));
-const querySnapshot = await getDocs(q);
-querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
-  user.value = doc.data();
-});
+onMounted(async () => {
+  const q = query(usersRef, where("uid", "==", userId));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    // doc.data() is never undefined for query doc snapshots
+    user.value = doc.data();
+  });
+})
+
 
 //Control the sections of the profile page
 const tab = ref('tab-0');
@@ -207,7 +212,7 @@ const combineFriends = async () => {
       });
     }
     invitedFriends.value = allFriendIds.filter((friendId) => userDataMap[friendId]).map((friendId) => ({ id: friendId, username: userDataMap[friendId] }));
-    console.log("inv"+ invitedFriends.value);
+    console.log("inv" + invitedFriends.value);
   }
 
 };
@@ -251,13 +256,5 @@ async function declineInvitation(invitation: any) {
   }
 }
 
-// definePageMeta({
-//   middleware: function (to, from) {
-//     const user = useFirebaseUser();
 
-//     if (!user.value) {
-//       return navigateTo('/');
-//     }
-//   },
-// });
 </script>

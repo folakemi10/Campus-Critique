@@ -1,11 +1,12 @@
 <template>
-  <GlobalNav />
+  <GlobalNav :isAuthenticated='authenticated' />
   <!-- If user is logged in, display all the posts for the class -->
+  <div class="text-center">
+    <v-progress-circular model-value="20" color="primary" indeterminate v-if="loading"></v-progress-circular>
+  </div>
 
-  <v-container>
-
+  <v-container v-if="!loading">
     <v-card>
-
       <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
       <v-card-title>{{ ratingDisplay(calculateAverage()) }}</v-card-title>
       <v-card-actions>
@@ -33,31 +34,53 @@ const firebaseUser = useFirebaseUser();
 const currentObjectName = ref<null | string>(null);
 const specificPosts = ref<any[]>([]);
 
+const authenticated = ref(false);
+const loading = ref(true);
+
+onMounted(async () => {
+  await loadContent();
+  if (!authenticated) {
+    navigateTo("/");
+  }
+});
+
+watch(firebaseUser, async () => {
+  await loadContent();
+});
+
+
+async function loadContent() {
+  loading.value = true;
+
+  if (firebaseUser.value !== null) {
+    const courseDocRef = doc(db, 'classes', reviewedObjectId);
+    const profDocRef = doc(db, 'profs', reviewedObjectId);
+
+    const courseDoc = await getDoc(courseDocRef);
+    const profDoc = await getDoc(profDocRef);
+
+    if (courseDoc.exists()) {
+      specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
+    }
+    if (profDoc.exists()) {
+      specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
+    }
+
+    currentObjectName.value = await getObject(reviewedObjectId);
+
+    authenticated.value = true;
+  }else{
+    authenticated.value = false;
+  }
+
+  loading.value = false;
+}
 
 // Use watch to watch the user variable
 watch(firebaseUser, (newValue) => {
   if (newValue) {
     firebaseUser.value = newValue;
   }
-});
-
-// Fetch specific posts and current object name
-onMounted(async () => {
-  const courseDocRef = doc(db, 'classes', reviewedObjectId);
-  const profDocRef = doc(db, 'profs', reviewedObjectId);
-
-  const courseDoc = await getDoc(courseDocRef);
-  const profDoc = await getDoc(profDocRef);
-
-  if (courseDoc.exists()) {
-    specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
-  }
-  if (profDoc.exists()) {
-    specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
-  }
-  
-  currentObjectName.value = await getObject(reviewedObjectId);
-
 });
 
 
@@ -98,7 +121,7 @@ const ratingDisplay = (rating: number): String => {
   if (rating === -1) {
     return "Overall Rating: No reviews yet"; // Return 0 if the array is empty to avoid division by zero.
   }
-  return "Overall Rating: "+ rating.toFixed(1) + " / 5";
+  return "Overall Rating: " + rating.toFixed(1) + " / 5";
 };
 
 </script>
