@@ -9,8 +9,16 @@
 
     <v-window v-model="tab" class="bg-black">
       <v-window-item value="tab-0">
+
         <v-container class="flex flex-col items-center justify-center">
-          <v-card class="min-w-full max-w-xl ">
+        <v-card v-if="isFromFriendsPage"  class="min-w-full max-w-xl">
+            <h1 class="text-3xl font-semibold mb-4"> {{ friendName ? friendName.firstname : 'Loading...' }} {{ friendName ? friendName.lastname : 'Loading...' }}</h1>
+            
+            <v-btn @click="inviteFriend">Invite Friend</v-btn>
+          </v-card>
+
+       
+          <v-card v-else class="min-w-full max-w-xl ">
             <v-card-text>
               <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
               <div class="text-lg mb-4">
@@ -18,16 +26,17 @@
               </div>
               <LogoutBtn />
             </v-card-text>
-            <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-            <v-btn @click="addFriend">Add Friend</v-btn>
           </v-card>
-
-          <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
-            @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
 
         </v-container>
 
+        <Card class="min-w-full max-w-xl" v-if="!isFromFriendsPage"  v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
+            @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
+
+
+
         <EditModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
+      
       </v-window-item>
 
 
@@ -42,16 +51,23 @@
 
 <script setup lang="ts">
 import { queryCollectionByField, del } from '~/lib/db';
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
-import { addDoc } from "firebase/firestore";
+import { useRoute } from 'vue-router';
 
 
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
-
+let friendId = "";
 const allPosts = ref();
 const userName = ref();
+const friendName = ref();
+const route = useRoute();
+
+//need to conditionaly render page
+const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
+
+const invitationsRef = collection(db, 'friends');
 
 
 onMounted(async () => {
@@ -69,7 +85,10 @@ const querySnapshot = await getDocs(q);
 querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
   userName.value = doc.data();
+
+  //console.log("in" +  userName.firstname);
 });
+console.log('1Query Snapshot:', querySnapshot);
 
 
 definePageMeta({
@@ -90,38 +109,6 @@ const tabItems = [
   'Posts', 'Saved Courses'
 ];
 
-
-//code for friends
-const newFriendEmail = ref('');
-
-const addFriend = async () => {
-  // Assuming you have a "friends" collection in Firebase Firestore
-  try {
-    const friendsRef = collection(db, "friends");
-
-    // Check if the friend's email exists in the "users" collection
-    const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
-    const userQuerySnapshot = await getDocs(userQuery);
-    if (!userQuerySnapshot.empty) {
-      const friendDoc = userQuerySnapshot.docs[0];
-      const friendData = friendDoc.data();
-
-      // Add the friend's information to the "friends" collection
-      await addDoc(friendsRef, {
-        userId: userId,
-        friendId: friendData.uid,
-        friendName: `${friendData.firstname} ${friendData.lastname}`,
-      });
-
-      // Clear the input field
-      newFriendEmail.value = '';
-    } else {
-      console.log("Friend not found with that email.");
-    }
-  } catch (error) {
-    console.error("Error adding friend:", error);
-  }
-};
 
 
 async function deletePost(id: string) {
@@ -159,38 +146,67 @@ const closeEditModal = (editedReview: any) => {
 };
 
 
-</script>
+onMounted(async () => {
+  if (route.query.friendId) {
+    friendId = route.query.friendId as string;
+    friendId = String(friendId);
 
-<!-- <script>
-import { queryCollectionByField } from "~/lib/db"; // Replace with your Firebase package import
+   const friendQuery = query(usersRef, where("uid", "==", friendId));
+   const fQuerySnapshot = await getDocs(friendQuery);
 
-
-export default {
-  data() {
-    return {
-      allPosts: [],
-      firebaseUser: useFirebaseUser().value,
-    }
-  },
-  async mounted() {
-    this.allPosts = await queryCollectionByField("posts", "uid", this.firebaseUser.uid );
-
-
-    return {
-      allPosts: [],
-      firebaseUser: null
-    }
-  },
-  computed: {
-    getUsername() {
-      const firebaseUser = useFirebaseUser();
-    //   if (!firebaseUser.value.displayName) {
-    //     return "Bad Registeration. Delete user from database and register again";
-    //   }
-      const username = "test";
-      return username;
-    }
+   fQuerySnapshot.forEach((doc) => {
+   friendName.value = doc.data();
+  });
   }
-}
+});
+
+
+
+
+//invite friend if selected user
+const inviteFriend = async () => {
+  try {
+    // Check if the userId is not null. this shouldn't happen but wouldn't let the code run otherwise
+    if (!userId) {
+      console.error('User is not authenticated. Unable to send an invitation.');
+      return;
+    }
+
+  
+    if (friendName.value) {
+      const friendData = friendName.value;
+
+
+      // Create a unique invitation document ID based on invitationDocId
+      const invitationDocId =
+        userId < friendData.uid
+          ? `${userId}_${friendData.uid}`
+          : `${friendData.uid}_${userId}`;
+
+      // Check if an invitation with the same ID already exists
+      const invitationDoc = doc(invitationsRef, invitationDocId);
+      const invitationDocSnapshot = await getDoc(invitationDoc);
+
+      if (!invitationDocSnapshot.exists()) {
+        // Create the invitation document with the same ID as invitationDocId
+        await setDoc(invitationDoc, {
+          senderId: userId,
+          receiverId: friendData.uid,
+          senderName: userName.value.username,
+          receiverName: friendName.value.username,
+          status: 'pending'
+        });
+
+        
+      } else {
+        console.log('An invitation for this friend already eyxists.');
+      }
+    } else {
+      console.log('Friend not found with that email.');
+    }
+  } catch (error) {
+    console.error('Error inviting friend:', error);
+  }
+};
 </script>
-   -->
+

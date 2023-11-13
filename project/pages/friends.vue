@@ -11,19 +11,17 @@
       <v-window-item value="tab-0">
         <v-container class="flex flex-col items-center justify-center">
 
-          <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
-
           <v-card class="min-w-full max-w-xl ">
             <v-card-text>
-              <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-              <v-btn @click="inviteFriend">Invite Friend</v-btn>
+              <v-autocomplete label="Search" placeholder="Search for a username" :items="userSuggestions"
+                v-model="selected" item-text="username" item-value="id" variant="outlined" return-object></v-autocomplete>
             </v-card-text>
           </v-card>
         </v-container>
 
-        <v-card v-for="friend in invitedFriends" :key="friend.id" class="my-10 min-w-full max-w-xl">
+        <v-card  class="my-10 min-w-full max-w-xl" v-for="friend in invitedFriends" :key="friend.id" :to="{ path: '/profile/', query: { friendId: friend.id, fromFriendsPage: 'fromFriendsPage' } }">
           <v-card-text>
-           {{ friend.username }}
+            {{ friend.username }}
           </v-card-text>
         </v-card>
       </v-window-item>
@@ -42,6 +40,22 @@
 
 
         </v-container>
+
+      </v-window-item>
+
+      <v-window-item value="tab-2">
+        <v-container fluid>
+          <h1 class="text-3xl font-semibold mb-4"> Sent Invites </h1>
+          <v-card v-for="invitation in sentInvitations" :key="invitation.id" class="mb-4">
+            <v-card-title> You sent an invite to {{ invitation.receiverName }} </v-card-title>
+            <v-card-actions>
+              <v-btn @click="declineInvitation(invitation)">withdraw</v-btn>
+            </v-card-actions>
+          </v-card>
+
+
+        </v-container>
+
       </v-window-item>
 
     </v-window>
@@ -54,26 +68,67 @@
 import { collection, updateDoc, deleteDoc, getDocs, query, where, doc, setDoc, getDoc, or } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { ref } from 'vue';
+import { queryEntireCollection } from "~/lib/db";
 
 
 
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
-
-
 const usersRef = collection(db, "users");
-
-const newFriendEmail = ref('');
-//const newFriendUsername = ref('');
-
-
+let userSuggestions = ref<any[]>([]);
+let allUsers = ref<any[]>([]);;
+let selected = ref();
+let friendObject = ref();
 let invitedFriends = ref<any[]>([]);
 const user = ref();
+
+
+
+//search bar for friends tab
+async function loadContent() {
+  if (firebaseUser.value != null) {
+    allUsers.value = await queryEntireCollection('users');
+    userSuggestions.value = allUsers.value.map(user => user.username);
+    //authenticated.value = true;
+  }
+  else {
+    console.log("No User");
+  }
+}
+
+
+watch(firebaseUser, async () => {
+  await loadContent();
+});
+
+watch(selected, () => {
+  const selectedUserObject =  allUsers.value.find(user => user.username === selected.value);
+  friendObject.value = selectedUserObject;
+  //console.log("pop" + friendObject.value);
+});
+
+watch(friendObject, async () => {
+  if(friendObject.value){
+  await navigateTo({
+    path: '/profile/',
+    query: {
+      friendId: friendObject.value.uid,
+      fromFriendsPage: "fromFriendsPage",
+    },
+    replace: true,
+  });
+}
+});
+
+
+onMounted(async () => {
+  await loadContent();
+});
+
 
 const q = query(usersRef, where("uid", "==", userId));
 const querySnapshot = await getDocs(q);
 querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
   user.value = doc.data();
 });
 
@@ -82,87 +137,19 @@ const tab = ref('tab-0');
 
 
 const tabItems = [
-  'Friends', 'Invites'
+  'Friends', 'Invites', 'Sent'
 ];
 
 const userDataMap: { [key: string]: string } = {};
 
-
-definePageMeta({
-  middleware: function (to, from) {
-    const user = useFirebaseUser();
-
-    if (!user.value) {
-      return navigateTo('/');
-    }
-  },
-});
-
-
 const invitationsRef = collection(db, 'friends');
-
-
-const inviteFriend = async () => {
-  try {
-    // Check if the userId is not null. this shouldn't happen but wouldn't let the code run otherwise
-    if (!userId) {
-      console.error('User is not authenticated. Unable to send an invitation.');
-      return;
-    }
-
-    //TODO: change for username and fix firestore rule
-
-    // Check if the friend's email exists in the "users" collection
-    //const userQuery = query(usersRef, where('username', '==', newFriendUsername));
-
-    const userQuery = query(usersRef, where('email', '==', newFriendEmail.value));
-
-    const userQuerySnapshot = await getDocs(userQuery);
-
-
-    if (!userQuerySnapshot.empty) {
-      const friendDoc = userQuerySnapshot.docs[0];
-      const friendData = friendDoc.data();
-
-
-      // Create a unique invitation document ID based on invitationDocId
-      const invitationDocId =
-        userId < friendData.uid
-          ? `${userId}_${friendData.uid}`
-          : `${friendData.uid}_${userId}`;
-
-
-      // Check if an invitation with the same ID already exists
-      const invitationDoc = doc(invitationsRef, invitationDocId);
-      const invitationDocSnapshot = await getDoc(invitationDoc);
-
-      if (!invitationDocSnapshot.exists()) {
-        // Create the invitation document with the same ID as invitationDocId
-        await setDoc(invitationDoc, {
-          senderId: userId,
-          receiverId: friendData.uid,
-          senderName: user.value.username,
-          status: 'pending'
-        });
-
-
-        // Clear the input field
-        newFriendEmail.value = '';
-      } else {
-        console.log('An invitation for this friend already eyxists.');
-      }
-    } else {
-      console.log('Friend not found with that email.');
-    }
-  } catch (error) {
-    console.error('Error inviting friend:', error);
-  }
-};
 
 
 // Create an invitations array to store received invitations
 const invitations = ref<any[]>([]);
 
+// Create an invitations array to store sent invitations
+const sentInvitations = ref<any[]>([]);
 
 // Populate the invitations array
 onMounted(async () => {
@@ -182,6 +169,21 @@ onMounted(async () => {
 });
 
 
+onMounted(async () => {
+  if (userId) {
+    // Retrieve pending invitations where the user is the sender
+    const invitationsQuery = query(
+      invitationsRef,
+      where('senderId', '==', userId),
+      where('status', '==', 'pending')
+    );
+    const invitationsQuerySnapshot = await getDocs(invitationsQuery);
+    sentInvitations.value = invitationsQuerySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  }
+});
 
 
 
@@ -209,7 +211,7 @@ const combineFriends = async () => {
     // Combine sender and receiver IDs into one array
     const allFriendIds = [...sentFriendIds, ...receivedFriendIds];
 
-    // Use the IDs to fetch the usernames from the 'users' collection
+    // Use the IDs to fetch the usernames from the users collection
     const q = query(usersRef);
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
@@ -219,7 +221,6 @@ const combineFriends = async () => {
       });
     }
     invitedFriends.value = allFriendIds.filter((friendId) => userDataMap[friendId]).map((friendId) => ({ id: friendId, username: userDataMap[friendId] }));
-    console.log("inv"+ invitedFriends.value);
   }
 
 };
@@ -241,7 +242,7 @@ async function acceptInvitation(invitation: any) {
 
     // Remove the accepted invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-    console.log("val" + invitations.value);
+  
   } catch (error) {
     console.error('Error accepting invitation:', error);
   }
@@ -254,18 +255,14 @@ async function declineInvitation(invitation: any) {
     await deleteDoc(invitationDoc);
 
 
-    console.log(invitations.value + "before");
+   
     // Remove the declined invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-    console.log(invitations.value + "after");
+    
+    sentInvitations.value = sentInvitations.value =  sentInvitations.value.filter((item) => item.id !==  invitation.id);
   } catch (error) {
     console.error('Error declining invitation:', error);
   }
 }
 
-
-
-
 </script>
-  
-<style lang="scss" scoped></style>
