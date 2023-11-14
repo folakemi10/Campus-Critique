@@ -1,5 +1,5 @@
 <template>
-  <v-btn v-if="firebaseUser" class="text-none text-subtitle-1" @click="onClick" color="primary-button" size="small"
+  <v-btn v-if="firebaseUser" @click="onClick" color="primary-button" size="small"
     variant="flat">
     Make a Review
   </v-btn>

@@ -1,42 +1,44 @@
 <template>
   <GlobalNav :isAuthenticated='authenticated' />
 
-
-
   <v-card v-if="authenticated">
     <v-card class="min-w-full max-w-xl ">
       <v-card-text>
         <div class="flex items-center">
-          <Avatar class="mr-4" size="64" :user='userDoc' />
+          <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="false"/>
           <h1 class="text-3xl font-semibold"> {{ userDoc.firstname }} {{ userDoc.lastname }}</h1>
         </div>
 
         <div class="text-lg mb-4">
-          {{ userDoc.username }}
+          {{ '@' + userDoc.username }}
         </div>
       </v-card-text>
 
       <v-card-actions>
-        <v-dialog width="500">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" text="Edit Profile" variant="outlined"> </v-btn>
-          </template>
 
-          <template v-slot:default="{ isActive }">
-            <v-card title="Dialog">
-              <v-card-text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore
-                magna aliqua.
-              </v-card-text>
+        <v-btn text="Edit Profile" variant="outlined" @click="dialog = true"> </v-btn>
 
-              <v-card-actions>
-                <v-spacer></v-spacer>
 
-                <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn>
-              </v-card-actions>
-            </v-card>
-          </template>
+        <v-dialog width="500" v-model="dialog">
+          <v-card title="Edit Profile">
+
+            <v-card-text>
+              <div class="flex items-center">
+                <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="true"/>
+                <!-- <ProfilePicBtn :uid_prop='userId' /> -->
+              </div>
+              <v-text-field :rules="[rules.required]" v-model="editedUserDoc.username" label="Username"
+                outlined></v-text-field>
+              <v-text-field :rules="[rules.required]" v-model="editedUserDoc.firstname" label="First Name"
+                outlined></v-text-field>
+              <v-text-field :rules="[rules.required]" v-model="editedUserDoc.lastname" label="Last Name"
+                outlined></v-text-field>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="saveProfileChanges">Save</v-btn>
+              <v-btn @click="dialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-dialog>
       </v-card-actions>
 
@@ -70,23 +72,6 @@
       </v-window-item>
     </v-window>
   </v-card>
-
-  <v-dialog>
-    <v-card>
-      <v-card-title>Edit Profile</v-card-title>
-      <v-card-text>
-
-        <v-text-field v-model="userDoc.username" label="Username" outlined></v-text-field>
-        <v-text-field v-model="userDoc.firstname" label="First Name" outlined></v-text-field>
-        <v-text-field v-model="userDoc.lastname" label="Last Name" outlined></v-text-field>
-
-      </v-card-text>
-      <v-card-actions>
-        <v-btn @click="saveChanges">Save</v-btn>
-        <v-btn @click="cancelModal">Cancel</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -94,6 +79,7 @@ import { queryCollectionByField, del } from '~/lib/db';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 
 const firebaseUser = useFirebaseUser();
@@ -104,6 +90,14 @@ const allPosts = ref();
 const authenticated = ref(false);
 
 const userDoc = ref();
+const editedUserDoc = ref();
+const dialog = ref(false);
+
+const rules = ref({
+  required: (value:any) => !!value || "Cannot be empty",
+});
+
+onUpdated(() => editedUserDoc.value = { ...userDoc.value });
 
 onMounted(async () => {
   await loadContent();
@@ -193,36 +187,34 @@ async function getUser(uid: string) {
 
 }
 
+const saveProfileChanges = async () => {
+  //console.log("saving changes");
 
-const cancelModal = () => {
-  console.log("canceling");
-  // userDoc.value = { ...props.reviewToEdit };
-  // emit('close-edit-modal', props.reviewToEdit);
+  if(editedUserDoc.value.username == '' || editedUserDoc.value.firstname === '' || editedUserDoc.value.lastname === ''){
+    //TODO: Put snack bar here to tell user these fields cannot be empty
+    return;
+  }
+
+  try {
+    const docRef = doc(db, "users", userId);
+    await updateDoc(docRef, {
+      username: editedUserDoc.value.username,
+      firstname: editedUserDoc.value.firstname,
+      lastname: editedUserDoc.value.lastname,
+    });
+
+    userDoc.value = await getUser(userId);
+
+  }
+  catch (e) {
+    console.log(e);
+  }
+
+  dialog.value = false;
 };
 
-const saveChanges = () => {
-  // updateDocument();
-  // emit('close-edit-modal', editedReview.value);
-  console.log("saving changes");
-};
 
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-async function updateDocument() {
-  // try {
-  //     const docRef = doc(db, "posts", props.reviewToEdit.id);
-  //     await updateDoc(docRef, {
-  //         rating: editedReview.value.rating,
-  //         textReview: editedReview.value.textReview,
-  //         modifiedAt: serverTimestamp()
-  //     });
-  // }
-  // catch (e) {
-  //     console.log(e);
-  // }
-
-  console.log("updating");
-}
 
 // definePageMeta({
 //   middleware: function (to, from) {

@@ -1,11 +1,11 @@
 <template>
-    <v-avatar color="black" :size="props.size || 'large'">
-        <img v-if="hasProfilePicture" :src="profilePictureUrl" alt="your profile image">
-        <span v-else class="text-h5">{{ getUserInitials() }}</span>
-    </v-avatar>
-
-
-    <!-- <ProfilePicBtn :uid_prop="props.user?.uid"/> -->
+    <div @good="receiveEmit">
+        <v-avatar color="black" :size="props.size || 'large'">
+            <img v-if="hasProfilePicture" :src="profilePictureUrl" alt="your profile image">
+            <span v-else class="text-h5">{{ getUserInitials() }}</span>
+        </v-avatar>
+        <ProfilePicBtn :uid_prop="props.user?.uid" v-if="props.isEditable"/>
+    </div>
 </template>
 
 
@@ -21,6 +21,7 @@ const props = defineProps({
     user: Object,
     function: Function,
     size: String,
+    isEditable: Boolean,
 })
 
 function getUserInitials() {
@@ -42,11 +43,8 @@ onMounted(async () => {
     }
 })
 
-
-
-function onClick() {
-
-    console.log("clicking avatar");
+function receiveEmit() {
+    console.log("updating");
 }
 
 
