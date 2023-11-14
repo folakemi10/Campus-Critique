@@ -7,7 +7,7 @@
       </v-tab>
     </v-tabs>
 
-    <v-window v-model="tab">
+    <v-window v-model="tab" class="bg-black">
       <v-window-item value="tab-0">
         <v-container class="flex flex-col items-center justify-center">
 
@@ -19,16 +19,24 @@
           </v-card>
         </v-container>
 
-        <v-card  class="my-10 min-w-full max-w-xl" v-for="friend in invitedFriends" :key="friend.id" :to="{ path: '/profile/', query: { friendId: friend.id, fromFriendsPage: 'fromFriendsPage' } }">
-          <v-card-text>
-            {{ friend.username }}
-          </v-card-text>
-        </v-card>
+        <v-container class="my-5">
+          <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
+          <v-card v-for="friend in invitedFriends" :key="friend.id"
+            :to="{ path: '/profile/', query: { friendId: friend.id, fromFriendsPage: 'fromFriendsPage' } }" class="mb-1">
+            <v-card-text class="py-4">
+              <h1>
+                {{ friend.username }}
+              </h1>
+            </v-card-text>
+            <v-divider></v-divider>
+          </v-card>
+        </v-container>
       </v-window-item>
 
 
       <v-window-item value="tab-1">
         <v-container fluid>
+          <Snackbar v-if="snackbar" :text = "snackbarText"/>
           <h1 class="text-3xl font-semibold mb-4"> Your Invites </h1>
           <v-card v-for="invitation in invitations" :key="invitation.id" class="mb-4">
             <v-card-title>{{ invitation.senderName }} is trying to become your friend</v-card-title>
@@ -45,6 +53,7 @@
 
       <v-window-item value="tab-2">
         <v-container fluid>
+          <Snackbar v-if="snackbar" :text = "snackbarText"/>
           <h1 class="text-3xl font-semibold mb-4"> Sent Invites </h1>
           <v-card v-for="invitation in sentInvitations" :key="invitation.id" class="mb-4">
             <v-card-title> You sent an invite to {{ invitation.receiverName }} </v-card-title>
@@ -81,6 +90,8 @@ let selected = ref();
 let friendObject = ref();
 let invitedFriends = ref<any[]>([]);
 const user = ref();
+const snackbar = ref(false);
+const snackbarText = ref();
 
 
 
@@ -102,22 +113,22 @@ watch(firebaseUser, async () => {
 });
 
 watch(selected, () => {
-  const selectedUserObject =  allUsers.value.find(user => user.username === selected.value);
+  const selectedUserObject = allUsers.value.find(user => user.username === selected.value);
   friendObject.value = selectedUserObject;
   //console.log("pop" + friendObject.value);
 });
 
 watch(friendObject, async () => {
-  if(friendObject.value){
-  await navigateTo({
-    path: '/profile/',
-    query: {
-      friendId: friendObject.value.uid,
-      fromFriendsPage: "fromFriendsPage",
-    },
-    replace: true,
-  });
-}
+  if (friendObject.value) {
+    await navigateTo({
+      path: '/profile/',
+      query: {
+        friendId: friendObject.value.uid,
+        fromFriendsPage: "fromFriendsPage",
+      },
+      replace: true,
+    });
+  }
 });
 
 
@@ -237,12 +248,16 @@ async function acceptInvitation(invitation: any) {
     const invitationDoc = doc(invitationsRef, invitation.id);
     await updateDoc(invitationDoc, { status: 'accepted' });
 
+    //make snackbar visible
+    snackbarText.value = "Invite accepted";
+    snackbar.value = true;
+
     // Call combineFriends to update the friends list with the newly accepted friend
     await combineFriends();
 
     // Remove the accepted invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-  
+
   } catch (error) {
     console.error('Error accepting invitation:', error);
   }
@@ -255,11 +270,15 @@ async function declineInvitation(invitation: any) {
     await deleteDoc(invitationDoc);
 
 
-   
+
+    //make snackbar visible
+    snackbarText.value = "Invite deleted";
+    snackbar.value = true;
+
     // Remove the declined invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
-    
-    sentInvitations.value = sentInvitations.value =  sentInvitations.value.filter((item) => item.id !==  invitation.id);
+
+    sentInvitations.value = sentInvitations.value = sentInvitations.value.filter((item) => item.id !== invitation.id);
   } catch (error) {
     console.error('Error declining invitation:', error);
   }

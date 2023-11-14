@@ -8,16 +8,20 @@
     </v-tabs>
 
     <v-window v-model="tab" class="bg-black">
+     
+      <Snackbar v-if="snackbar" :text = "snackbarText"/>
+   
       <v-window-item value="tab-0">
 
         <v-container class="flex flex-col items-center justify-center">
-        <v-card v-if="isFromFriendsPage"  class="min-w-full max-w-xl">
-            <h1 class="text-3xl font-semibold mb-4"> {{ friendName ? friendName.firstname : 'Loading...' }} {{ friendName ? friendName.lastname : 'Loading...' }}</h1>
-            
-            <v-btn @click="inviteFriend">Invite Friend</v-btn>
+          <v-card v-if="isFromFriendsPage" class="min-w-full max-w-xl">
+            <h1 class="text-3xl font-semibold mt-4 mb-4 pl-4 pr-4"> {{ friendName ? friendName.firstname : 'Loading...' }} {{ friendName
+              ? friendName.lastname : 'Loading...' }}</h1>
+
+            <v-btn :variant="variant"  class="mx-4 mb-4" @click="inviteFriend">Invite Friend</v-btn>
           </v-card>
 
-       
+
           <v-card v-else class="min-w-full max-w-xl ">
             <v-card-text>
               <h1 class="text-3xl font-semibold mb-4"> {{ userName.firstname }} {{ userName.lastname }}</h1>
@@ -30,13 +34,12 @@
 
         </v-container>
 
-        <Card class="min-w-full max-w-xl" v-if="!isFromFriendsPage"  v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
-            @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
-
-
+        <Card class="min-w-full max-w-xl" v-if="!isFromFriendsPage" v-for="(review, index) in allPosts" :key="review.id"
+          :review="review" :showChangeBtns="true" @open-edit-modal="openEditModalForReview" :deletePost="deletePost">
+        </Card>
 
         <EditModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
-      
+
       </v-window-item>
 
 
@@ -55,7 +58,6 @@ import { doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase
 import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 
-
 const firebaseUser = useFirebaseUser();
 const userId = firebaseUser.value?.uid;
 let friendId = "";
@@ -63,6 +65,16 @@ const allPosts = ref();
 const userName = ref();
 const friendName = ref();
 const route = useRoute();
+const snackbar = ref(false);
+const snackbarText = ref();
+
+
+const props = defineProps({
+    variant: {
+        type: String as PropType<"outlined" | "flat" | "text" | "elevated" | "tonal" | "plain">,
+        default: "outlined", // Default to a valid Vuetify variant
+    },
+});
 
 //need to conditionaly render page
 const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
@@ -88,7 +100,6 @@ querySnapshot.forEach((doc) => {
 
   //console.log("in" +  userName.firstname);
 });
-console.log('1Query Snapshot:', querySnapshot);
 
 
 definePageMeta({
@@ -151,12 +162,12 @@ onMounted(async () => {
     friendId = route.query.friendId as string;
     friendId = String(friendId);
 
-   const friendQuery = query(usersRef, where("uid", "==", friendId));
-   const fQuerySnapshot = await getDocs(friendQuery);
+    const friendQuery = query(usersRef, where("uid", "==", friendId));
+    const fQuerySnapshot = await getDocs(friendQuery);
 
-   fQuerySnapshot.forEach((doc) => {
-   friendName.value = doc.data();
-  });
+    fQuerySnapshot.forEach((doc) => {
+      friendName.value = doc.data();
+    });
   }
 });
 
@@ -172,7 +183,7 @@ const inviteFriend = async () => {
       return;
     }
 
-  
+
     if (friendName.value) {
       const friendData = friendName.value;
 
@@ -197,16 +208,22 @@ const inviteFriend = async () => {
           status: 'pending'
         });
 
-        
+        //make snackbar visible
+        snackbarText.value = "Invite Sent"
+        snackbar.value = true;
+
       } else {
+        
+        //make snackbar visible
+        snackbarText.value = "An invitation for this friend already eyxists"
+        snackbar.value = true;
         console.log('An invitation for this friend already eyxists.');
       }
-    } else {
-      console.log('Friend not found with that email.');
     }
   } catch (error) {
     console.error('Error inviting friend:', error);
   }
 };
+//const showSnackbar = computed(() => isCurrentUser.value && snackbar.value);
 </script>
 
