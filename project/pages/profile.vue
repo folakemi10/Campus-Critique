@@ -114,7 +114,7 @@ import { useRoute } from 'vue-router';
 
 
 const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value?.uid;
+//const userId = firebaseUser.value?.uid;
 let friendId = "";
 const allPosts = ref();
 const friendPosts = ref();
@@ -123,7 +123,7 @@ const friendName = ref();
 const route = useRoute();
 const snackbar = ref(false);
 const snackbarText = ref();
-
+let userId = "";
 
 const authenticated = ref(false);
 
@@ -150,7 +150,7 @@ const props = defineProps({
 const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
 const isFromAcceptedsPage = route.query.fromFriendsPage === 'fromAcceptedPage';
 const invitationsRef = collection(db, 'friends');
-
+const tabItems: any[] = [];
 
 onMounted(async () => {
   await loadContent();
@@ -177,7 +177,8 @@ async function loadContent() {
     } else {
       console.log('userId does not exist');
     }
-
+  }
+}
 
 onMounted(async () => {
   if (friendId) {
@@ -215,7 +216,7 @@ definePageMeta({
 //Control the sections of the profile page
 const tab = ref('tab-0');
 
-const tabItems: any[] = [];
+
 
 
 async function deletePost(id: string) {
@@ -336,8 +337,6 @@ const inviteFriend = async () => {
     console.error('Error inviting friend:', error);
   }
 };
-//const showSnackbar = computed(() => isCurrentUser.value && snackbar.value);
-</script>
 
 const saveProfileChanges = async () => {
   //console.log("saving changes");
@@ -364,6 +363,7 @@ const saveProfileChanges = async () => {
 
   dialog.value = false;
 };
+
 
 </script>
 
