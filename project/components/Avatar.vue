@@ -39,7 +39,7 @@ onMounted(async () => {
     profilePictureUrl.value = await getProfilePic(props.user?.id);
     if (profilePictureUrl.value === '') {
         hasProfilePicture.value = false;
-        profilePictureUrl.value = getUserInitials();
+        //profilePictureUrl.value = getUserInitials();
     }
 })
 
