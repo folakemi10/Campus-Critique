@@ -4,7 +4,7 @@
       <v-row align-items="start">
         <v-col cols="auto">
           <!-- User who made the post -->
-          <v-card-subtitle> {{ username }} &#183; {{ formatDate(review?.modifiedAt) }} </v-card-subtitle>
+          <v-card-subtitle> {{ username }} &#183; {{ review?.modifiedAt ? formatDate(review?.modifiedAt) : "No date"}} </v-card-subtitle>
         </v-col>
 
 
