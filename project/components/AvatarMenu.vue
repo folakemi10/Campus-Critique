@@ -45,7 +45,13 @@ const userInitals = ref();
 
 if (firebaseUser.value != null) {
     user.value = await getUser(firebaseUser.value.uid);
-    userInitals.value = user.value.firstname.charAt(0) + user.value.lastname.charAt(0);
+
+    if (user.value.firstname == null || user.value.firstname == null) {
+        userInitals.value = user.value.email.charAt(0);
+    } else {
+        userInitals.value = user.value.firstname?.charAt(0) + user.value.lastname?.charAt(0);
+    }
+
 }
 
 async function getUser(uid: string) {

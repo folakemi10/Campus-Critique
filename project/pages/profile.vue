@@ -1,7 +1,7 @@
 <template>
   <GlobalNav />
-  <v-card>
-    <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
+  <v-card v-if="authenticated">
+    <v-tabs v-model="tab" align-tabs="start" color="primary">
       <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
         {{ item }}
       </v-tab>
@@ -59,8 +59,10 @@ import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 
 const firebaseUser = useFirebaseUser();
+
 const userId = firebaseUser.value?.uid;
 let friendId = "";
+
 const allPosts = ref();
 const userName = ref();
 const friendName = ref();
@@ -81,14 +83,14 @@ const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
 
 const invitationsRef = collection(db, 'friends');
 
+const usersRef = collection(db, "users");
+const authenticated = ref(false);
+
 
 onMounted(async () => {
-  if (userId) {
-    allPosts.value = await queryCollectionByField("posts", "uid", userId);
-  } else {
-    console.log('userId does not exist');
-  }
+  await loadContent();
 });
+
 
 
 const usersRef = collection(db, "users");
@@ -99,19 +101,46 @@ querySnapshot.forEach((doc) => {
   userName.value = doc.data();
 
   //console.log("in" +  userName.firstname);
+
+watch(firebaseUser, async () => {
+  await loadContent();
+
 });
 
+async function loadContent() {
+  if (firebaseUser.value != null) {
+    userId = firebaseUser.value?.uid;
+    const q = query(usersRef, where("uid", "==", userId));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      userName.value = doc.data();
+    });
 
-definePageMeta({
-  middleware: function (to, from) {
-    const user = useFirebaseUser();
-
-
-    if (!user.value) {
-      return navigateTo('/');
+    if (userId) {
+      allPosts.value = await queryCollectionByField("posts", "uid", userId);
+    } else {
+      console.log('userId does not exist');
     }
-  },
-});
+
+    authenticated.value = true;
+  } else {
+    authenticated.value = false;
+  }
+}
+
+
+
+// definePageMeta({
+//   middleware: function (to, from) {
+//     const user = useFirebaseUser();
+
+
+//     if (!user.value) {
+//       return navigateTo('/');
+//     }
+//   },
+// });
 
 //Control the sections of the profile page
 const tab = ref('tab-0');

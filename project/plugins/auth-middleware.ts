@@ -1,4 +1,4 @@
-import { Auth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 
 export default defineNuxtPlugin(() => {
   addRouteMiddleware("auth", (to, from) => {
