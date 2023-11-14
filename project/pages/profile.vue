@@ -1,7 +1,7 @@
 <template>
   <GlobalNav />
-  <v-card v-if="authenticated">
-    <v-tabs v-model="tab" align-tabs="start" color="primary">
+  <v-card>
+    <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
       <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
         {{ item }}
       </v-tab>
@@ -34,9 +34,14 @@
 
         </v-container>
 
-        <Card class="min-w-full max-w-xl" v-if="!isFromFriendsPage" v-for="(review, index) in allPosts" :key="review.id"
+        <Card class="min-w-full max-w-xl" v-if="!isFromFriendsPage || !isFromAcceptedsPage"  v-for="(review, index) in allPosts" :key="review.id"
           :review="review" :showChangeBtns="true" @open-edit-modal="openEditModalForReview" :deletePost="deletePost">
         </Card>
+
+        <Card class="min-w-full max-w-xl" v-if="isFromAcceptedsPage" v-for="(review, index) in friendPosts" :key="review.id"
+          :review="review" :showChangeBtns="true">
+        </Card>
+
 
         <EditModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
 
@@ -59,11 +64,10 @@ import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 
 const firebaseUser = useFirebaseUser();
-
 const userId = firebaseUser.value?.uid;
 let friendId = "";
-
 const allPosts = ref();
+const friendPosts = ref();
 const userName = ref();
 const friendName = ref();
 const route = useRoute();
@@ -80,18 +84,26 @@ const props = defineProps({
 
 //need to conditionaly render page
 const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
-
+const isFromAcceptedsPage = route.query.fromFriendsPage === 'fromAcceptedPage';
 const invitationsRef = collection(db, 'friends');
-
-const usersRef = collection(db, "users");
-const authenticated = ref(false);
 
 
 onMounted(async () => {
-  await loadContent();
+  if (userId) {
+    allPosts.value = await queryCollectionByField("posts", "uid", userId);
+  } else {
+    console.log('userId does not exist');
+  }
 });
 
 
+onMounted(async () => {
+  if (friendId) {
+    friendPosts.value = await queryCollectionByField("posts", "uid", friendId);
+  } else {
+    console.log('friendId does not exist');
+  }
+});
 
 const usersRef = collection(db, "users");
 const q = query(usersRef, where("uid", "==", userId));
@@ -101,46 +113,19 @@ querySnapshot.forEach((doc) => {
   userName.value = doc.data();
 
   //console.log("in" +  userName.firstname);
-
-watch(firebaseUser, async () => {
-  await loadContent();
-
 });
 
-async function loadContent() {
-  if (firebaseUser.value != null) {
-    userId = firebaseUser.value?.uid;
-    const q = query(usersRef, where("uid", "==", userId));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      userName.value = doc.data();
-    });
 
-    if (userId) {
-      allPosts.value = await queryCollectionByField("posts", "uid", userId);
-    } else {
-      console.log('userId does not exist');
+definePageMeta({
+  middleware: function (to, from) {
+    const user = useFirebaseUser();
+
+
+    if (!user.value) {
+      return navigateTo('/');
     }
-
-    authenticated.value = true;
-  } else {
-    authenticated.value = false;
-  }
-}
-
-
-
-// definePageMeta({
-//   middleware: function (to, from) {
-//     const user = useFirebaseUser();
-
-
-//     if (!user.value) {
-//       return navigateTo('/');
-//     }
-//   },
-// });
+  },
+});
 
 //Control the sections of the profile page
 const tab = ref('tab-0');
