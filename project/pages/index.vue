@@ -1,5 +1,5 @@
 <template>
-  <GlobalNav class="m-4" />
+  <GlobalNav :isAuthenticated='authenticated' />
   <div class="text-center">
     <v-progress-circular model-value="20" color="primary"  indeterminate v-if="loading"></v-progress-circular>
   </div>
@@ -39,6 +39,9 @@ const selected = ref();
 
 onMounted(async () => {
   await loadContent();
+  if(!authenticated){
+    navigateTo("/");
+  }
 });
 
 watch(firebaseUser, async () => {

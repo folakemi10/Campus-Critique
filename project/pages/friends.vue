@@ -1,5 +1,5 @@
 <template>
-  <GlobalNav />
+  <GlobalNav :isAuthenticated='authenticated' />
   <v-card>
     <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
       <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
@@ -18,6 +18,7 @@
             </v-card-text>
           </v-card>
         </v-container>
+
 
         <v-container class="my-5">
           <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
@@ -93,6 +94,8 @@ const user = ref();
 const snackbar = ref(false);
 const snackbarText = ref();
 
+const authenticated = firebaseUser ? true : false;
+
 
 
 //search bar for friends tab
@@ -142,6 +145,7 @@ const querySnapshot = await getDocs(q);
 querySnapshot.forEach((doc) => {
   user.value = doc.data();
 });
+
 
 //Control the sections of the profile page
 const tab = ref('tab-0');
@@ -232,6 +236,7 @@ const combineFriends = async () => {
       });
     }
     invitedFriends.value = allFriendIds.filter((friendId) => userDataMap[friendId]).map((friendId) => ({ id: friendId, username: userDataMap[friendId] }));
+
   }
 
 };
