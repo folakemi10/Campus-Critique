@@ -1,5 +1,4 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' />
   <div class="text-center">
     <v-progress-circular model-value="20" color="primary"  indeterminate v-if="loading"></v-progress-circular>
   </div>
@@ -63,7 +62,7 @@ async function loadContent() {
     authenticated.value = true;
   }
   else {
-    console.log("No User, Clearing Data");
+    //console.log("No User, Clearing Data");
     authenticated.value = false;
   }
 

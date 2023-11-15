@@ -9,30 +9,30 @@
 
 
 <script setup lang="ts">
-import { getProfilePic } from '~/lib/storage';
-
 
 const hasProfilePicture = ref(true);
-const pictureUrl = ref('');
 
-const {
-    profilePicUrl,
-    updatePicture
-} = inject('picture') as any;
+const {profilePicUrl, updatePicture} = inject('picture') as any;
 
 const props = defineProps({
     user: Object,
-    profilePictureUrl: {
-        Type: String,
-        default: null
-    },
     function: Function,
     size: String,
     isEditable: Boolean,
 })
 
+
+
+onMounted(async () => {
+    await updatePicture();
+
+    if (profilePicUrl === '') {
+        hasProfilePicture.value = false;
+    }
+})
+
 function getUserInitials() {
-    if (props.profilePictureUrl !== null) {
+    if (profilePicUrl === null) {
         if (props.user?.firstname == null || props.user?.firstname == null) {
             return props.user?.email.charAt(0);
         } else {
@@ -42,16 +42,6 @@ function getUserInitials() {
     return '';
 }
 
-onMounted(async () => {
-    //props.profilePictureUrl?.value = await getProfilePic(props.user?.id);
-    if (props.profilePictureUrl === null) {
-        hasProfilePicture.value = false;
-    }
-    updateProfilePicture();
-})
 
-async function updateProfilePicture() {
-    pictureUrl.value = await getProfilePic(props.user?.id);
-}
 
 </script>

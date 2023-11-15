@@ -1,5 +1,4 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' />
   <!-- If user is logged in, display all the posts for the class -->
   <div class="text-center">
     <v-progress-circular model-value="20" color="primary" indeterminate v-if="loading"></v-progress-circular>

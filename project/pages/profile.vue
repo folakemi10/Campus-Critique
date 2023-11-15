@@ -1,11 +1,9 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' :key="key" />
-
   <v-card v-if="authenticated">
     <v-card class="min-w-full max-w-xl ">
       <v-card-text>
         <div class="flex items-center">
-          <Avatar class="mr-4" size="64" :user='userDoc' :profilePictureUrl="profilePicUrl" />
+          <Avatar class="mr-4" size="64" :user='userDoc' />
           <h1 class="text-3xl font-semibold"> {{ userDoc.firstname }} {{ userDoc.lastname }}</h1>
         </div>
 
@@ -24,7 +22,7 @@
 
             <v-card-text>
               <div class="flex items-center">
-                <Avatar class="mr-4" size="64" :user='userDoc' :profilePictureUrl="profilePicUrl" :key="key" />
+                <Avatar class="mr-4" size="64" :user='userDoc' />
                 <ProfilePicBtn :uid_prop="userDoc.uid" @update-profile-pic='updatePicture' />
                 <!--  -->
               </div>
@@ -93,8 +91,6 @@ const userDoc = ref();
 const editedUserDoc = ref();
 const dialog = ref(false);
 
-const profilePicUrl = ref();
-
 const rules = ref({
   required: (value: any) => !!value || "Cannot be empty",
 });
@@ -110,8 +106,9 @@ onMounted(async () => {
 
 watch(firebaseUser, async () => {
   await loadContent();
-
 });
+
+
 
 async function loadContent() {
   if (firebaseUser.value != null) {
@@ -125,8 +122,6 @@ async function loadContent() {
     } else {
       console.log('userId does not exist');
     }
-
-    profilePicUrl.value = await getProfilePic(userId);
 
     authenticated.value = true;
   } else {
@@ -155,7 +150,7 @@ async function deletePost(id: string) {
 }
 
 const isActive = ref(false);
-const reviewToEdit = ref(null);
+const reviewToEdit = ref();
 
 const openEditModalForReview = (review: any) => {
   reviewToEdit.value = review;
@@ -217,62 +212,7 @@ const saveProfileChanges = async () => {
   dialog.value = false;
 };
 
-const key = ref(0);
+const {profilePicUrl, updatePicture} = inject('picture') as any;
 
-const updatePicture = async () => {
-  profilePicUrl.value = await getProfilePic(userDoc.value.id);
-  //key.value += 1;
-};
-
-
-provide('picture', {
-  profilePicUrl,
-  updatePicture
-})
-
-
-
-// definePageMeta({
-//   middleware: function (to, from) {
-//     const user = useFirebaseUser();
-//     if (!user) {
-//     return navigateTo('/')
-//   }
-//   },
-// });
-
-
-// //code for friends
-// const newFriendEmail = ref('');
-
-// const addFriend = async () => {
-//   // Assuming you have a "friends" collection in Firebase Firestore
-//   try {
-//     const friendsRef = collection(db, "friends");
-
-//     // Check if the friend's email exists in the "users" collection
-//     const usersRef = collection(db, "users");
-//     const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
-//     const userQuerySnapshot = await getDocs(userQuery);
-//     if (!userQuerySnapshot.empty) {
-//       const friendDoc = userQuerySnapshot.docs[0];
-//       const friendData = friendDoc.data();
-
-//       // Add the friend's information to the "friends" collection
-//       await addDoc(friendsRef, {
-//         userId: userId,
-//         friendId: friendData.uid,
-//         friendName: `${friendData.firstname} ${friendData.lastname}`,
-//       });
-
-//       // Clear the input field
-//       newFriendEmail.value = '';
-//     } else {
-//       console.log("Friend not found with that email.");
-//     }
-//   } catch (error) {
-//     console.error("Error adding friend:", error);
-//   }
-// };
 
 </script>

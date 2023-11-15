@@ -2,13 +2,13 @@
     <v-menu min-width="200px" rounded>
         <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props">
-                <Avatar :user='user' v-bind="props" :profilePictureUrl="profilePicUrl"/>
+                <Avatar :user='user' v-bind="props"/>
             </v-btn>
         </template>
         <v-card>
             <v-card-text>
                 <div class="mx-auto text-center">
-                    <Avatar :user='user' :profilePictureUrl="profilePicUrl"/>
+                    <Avatar :user='user'/>
                     <h3>{{ props.user?.firstname + " " + props.user?.lastname }}</h3>
                     <p class="text-caption mt-1">
                         {{ props.user?.email }}
@@ -31,17 +31,11 @@
 
 <script setup lang="ts">
 
-import { getProfilePic } from '~/lib/storage';
-
 const user = ref();
-
-const profilePicUrl = ref();
 
 const props = defineProps({
     user: Object,
 })
-
-profilePicUrl.value = await getProfilePic(props.user?.uid);
 
 // if (firebaseUser.value != null) {
 //     props.user?.value = await getUser(firebaseUser.value.uid);
