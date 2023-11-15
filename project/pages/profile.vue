@@ -51,7 +51,7 @@
       </v-tab>
     </v-tabs>
 
-    <v-window v-model="tab" class="bg-black">
+    <!-- <v-window v-model="tab" class="bg-black">
      
       <Snackbar v-if="snackbar" :text = "snackbarText"/>
    
@@ -98,8 +98,8 @@
         <v-container fluid>
 
         </v-container>
-      </v-window-item>
-    </v-window>
+      </v-window-item> -->
+    <!-- </v-window> -->
   </v-card>
 </template>
 
@@ -182,8 +182,6 @@ onMounted(async () => {
     friendPosts.value = await queryCollectionByField("posts", "uid", friendId);
   } else {
     console.log('friendId does not exist');
-    //authenticated.value = false;
-    //navigateTo('/');
   }
 });
 
@@ -195,7 +193,6 @@ querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
   userName.value = doc.data();
 
-  //console.log("in" +  userName.firstname);
 });
 
 
