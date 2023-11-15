@@ -69,7 +69,6 @@ watch(firebaseUser, async () => {
 });
 
 onMounted(async () => {
-  console.log("Mounted");
   await loadContent();
 });
 
@@ -90,13 +89,13 @@ async function loadContent() {
 watch(selectedClass, async () => {
   review.value.class = selectedClass.value.id;
   review.value.professor = reviewedObjectId;
-  console.log(review.value);
+  //console.log(review.value);
 })
 
 watch(selectedProf, async () => {
   review.value.professor = selectedProf.value.id;
   review.value.class = reviewedObjectId;
-  console.log(review.value);
+  //console.log(review.value);
 })
 
 

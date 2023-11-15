@@ -11,6 +11,7 @@ import { ref, uploadBytes } from "firebase/storage";
 import { storage } from '~/lib/firebase';
 
 export default {
+    emits: ['updateProfilePic'],
     props: {
         uid_prop: String
     },
@@ -40,6 +41,7 @@ export default {
             // upload file
             const upload_result = await uploadBytes(pic_ref, f);
             console.log(upload_result);
+            this.$emit("updateProfilePic");
         },
     },
 }

@@ -1,5 +1,4 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' />
   <v-card>
     <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
       <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">

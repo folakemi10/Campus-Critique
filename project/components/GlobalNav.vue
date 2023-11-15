@@ -9,14 +9,14 @@
             </v-btn>
 
             <v-spacer></v-spacer>
-            <AvatarMenu v-if="props.isAuthenticated"/>
-           
+            <AvatarMenu v-if="props.isAuthenticated" :user="user"/>
+
             <div v-if="isAdmin">
                 <AdminBtn :button-text="'Admin'" :size="'large'" />
             </div>
 
 
-            <div v-if="!props.isAuthenticated ">
+            <div v-if="!props.isAuthenticated">
                 <LoginBtn :button-text="'Login'" :size="'large'" />
                 <RegisterBtn :button-text="'Join'" :size="'large'" />
             </div>
@@ -33,10 +33,12 @@ import { db } from '~/lib/firebase';
 
 const firebaseUser = useFirebaseUser();
 const isAdmin = ref(false);
+const user = ref();
 
 
 const props = defineProps({
-  isAuthenticated: Boolean,
+    isAuthenticated: Boolean,
+    key: Number,
 })
 
 
@@ -62,14 +64,15 @@ async function checkAdmin() {
         return false;
     }
 
-    const user = docSnap.data();
+    user.value = docSnap.data();
     //console.log(user);
-    if (user.admin) {
-      isAdmin.value = true;
+    if (user.value.admin) {
+        isAdmin.value = true;
     }
     else {
-      isAdmin.value = false;
+        isAdmin.value = false;
     }
+    ;
 }
 
 </script>

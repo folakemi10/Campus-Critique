@@ -1,11 +1,9 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' />
-
   <v-card v-if="authenticated">
     <v-card class="min-w-full max-w-xl ">
       <v-card-text>
         <div class="flex items-center">
-          <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="false"/>
+          <Avatar class="mr-4" size="64" :user='userDoc' />
           <h1 class="text-3xl font-semibold"> {{ userDoc.firstname }} {{ userDoc.lastname }}</h1>
         </div>
 
@@ -24,8 +22,9 @@
 
             <v-card-text>
               <div class="flex items-center">
-                <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="true"/>
-                <!-- <ProfilePicBtn :uid_prop='userId' /> -->
+                <Avatar class="mr-4" size="64" :user='userDoc' />
+                <ProfilePicBtn :uid_prop="userDoc.uid" @update-profile-pic='updatePicture' />
+                <!--  -->
               </div>
               <v-text-field :rules="[rules.required]" v-model="editedUserDoc.username" label="Username"
                 outlined></v-text-field>
@@ -78,12 +77,11 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
 import { doc, updateDoc } from "firebase/firestore";
+import { getProfilePic } from '~/lib/storage';
 
 
 const firebaseUser = useFirebaseUser();
 let userId = "";
-
-const allPosts = ref();
 
 const authenticated = ref(false);
 
@@ -92,7 +90,7 @@ const editedUserDoc = ref();
 const dialog = ref(false);
 
 const rules = ref({
-  required: (value:any) => !!value || "Cannot be empty",
+  required: (value: any) => !!value || "Cannot be empty",
 });
 
 onUpdated(() => editedUserDoc.value = { ...userDoc.value });
@@ -106,9 +104,14 @@ onMounted(async () => {
 
 watch(firebaseUser, async () => {
   await loadContent();
-
 });
 
+interface Post {
+  id: string;
+  // Other properties of a post
+}
+
+const allPosts = ref<Post[]>([]);
 
 async function loadContent() {
   if (firebaseUser.value != null) {
@@ -117,8 +120,6 @@ async function loadContent() {
 
     if (userId) {
       allPosts.value = await queryCollectionByField("posts", "uid", userId);
-      tabItems.push('Posts (' + allPosts.value.length + ")");
-      tabItems.push('Saved Courses');
     } else {
       console.log('userId does not exist');
     }
@@ -133,37 +134,43 @@ async function loadContent() {
 //Control the sections of the profile page
 const tab = ref('tab-0');
 
-const tabItems: any[] = [];
+const tabItems = computed(() => {
+  return ['Posts (' + allPosts.value.length + ")", 'Saved Courses'];
+});
 
 async function deletePost(id: string) {
+   
   //console.log("delete post");
   try {
     await del("posts", id);
 
-    const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
-    if (postIndex !== -1) {
-      allPosts.value.splice(postIndex, 1); // Remove the card from the array
-    }
+    allPosts.value = await queryCollectionByField("posts", "uid", userId);
+
+    // const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
+    // if (postIndex !== -1) {
+    //   allPosts.value.splice(postIndex, 1); // Remove the card from the array
+    // }
   } catch (e) {
     console.log(e);
   }
 }
 
 const isActive = ref(false);
-const reviewToEdit = ref(null);
+const reviewToEdit = ref();
 
 const openEditModalForReview = (review: any) => {
   reviewToEdit.value = review;
   isActive.value = true;
 };
 
-const closeEditModal = (editedReview: any) => {
-  //console.log(editedReview);
-  const index = allPosts.value.findIndex((review: any) => review.id === editedReview.id);
-  //console.log(index);
-  if (index !== -1) {
-    allPosts.value[index] = editedReview;
-  }
+const closeEditModal = async (editedReview: any) => {
+  allPosts.value = await queryCollectionByField("posts", "uid", userId);
+
+  // const index = allPosts.value.findIndex((review: any) => review.id === editedReview.id);
+
+  // if (index !== -1) {
+  //   allPosts.value[index] = editedReview;
+  // }
   isActive.value = false;
 };
 
@@ -185,10 +192,11 @@ async function getUser(uid: string) {
 
 }
 
+
 const saveProfileChanges = async () => {
   //console.log("saving changes");
 
-  if(editedUserDoc.value.username == '' || editedUserDoc.value.firstname === '' || editedUserDoc.value.lastname === ''){
+  if (editedUserDoc.value.username == '' || editedUserDoc.value.firstname === '' || editedUserDoc.value.lastname === '') {
     //TODO: Put snack bar here to tell user these fields cannot be empty
     return;
   }
@@ -211,50 +219,7 @@ const saveProfileChanges = async () => {
   dialog.value = false;
 };
 
+const {profilePicUrl, updatePicture} = inject('picture') as any;
 
-
-
-// definePageMeta({
-//   middleware: function (to, from) {
-//     const user = useFirebaseUser();
-//     if (!user) {
-//     return navigateTo('/')
-//   }
-//   },
-// });
-
-
-// //code for friends
-// const newFriendEmail = ref('');
-
-// const addFriend = async () => {
-//   // Assuming you have a "friends" collection in Firebase Firestore
-//   try {
-//     const friendsRef = collection(db, "friends");
-
-//     // Check if the friend's email exists in the "users" collection
-//     const usersRef = collection(db, "users");
-//     const userQuery = query(usersRef, where("email", "==", newFriendEmail.value));
-//     const userQuerySnapshot = await getDocs(userQuery);
-//     if (!userQuerySnapshot.empty) {
-//       const friendDoc = userQuerySnapshot.docs[0];
-//       const friendData = friendDoc.data();
-
-//       // Add the friend's information to the "friends" collection
-//       await addDoc(friendsRef, {
-//         userId: userId,
-//         friendId: friendData.uid,
-//         friendName: `${friendData.firstname} ${friendData.lastname}`,
-//       });
-
-//       // Clear the input field
-//       newFriendEmail.value = '';
-//     } else {
-//       console.log("Friend not found with that email.");
-//     }
-//   } catch (error) {
-//     console.error("Error adding friend:", error);
-//   }
-// };
 
 </script>
