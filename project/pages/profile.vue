@@ -42,9 +42,6 @@
           </v-card>
         </v-dialog>
       </v-card-actions>
-
-      <!-- <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-    <v-btn @click="addFriend">Add Friend</v-btn> -->
     </v-card>
 
     <v-tabs v-model="tab" align-tabs="start" color="primary">
@@ -185,7 +182,7 @@ onMounted(async () => {
     friendPosts.value = await queryCollectionByField("posts", "uid", friendId);
   } else {
     console.log('friendId does not exist');
-    authenticated.value = false;
+    //authenticated.value = false;
     //navigateTo('/');
   }
 });
