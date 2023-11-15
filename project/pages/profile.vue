@@ -1,11 +1,11 @@
 <template>
-  <GlobalNav :isAuthenticated='authenticated' />
+  <GlobalNav :isAuthenticated='authenticated' :key="key" />
 
   <v-card v-if="authenticated">
     <v-card class="min-w-full max-w-xl ">
       <v-card-text>
         <div class="flex items-center">
-          <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="false"/>
+          <Avatar class="mr-4" size="64" :user='userDoc' :profilePictureUrl="profilePicUrl" />
           <h1 class="text-3xl font-semibold"> {{ userDoc.firstname }} {{ userDoc.lastname }}</h1>
         </div>
 
@@ -24,8 +24,9 @@
 
             <v-card-text>
               <div class="flex items-center">
-                <Avatar class="mr-4" size="64" :user='userDoc' :isEditable="true"/>
-                <!-- <ProfilePicBtn :uid_prop='userId' /> -->
+                <Avatar class="mr-4" size="64" :user='userDoc' :profilePictureUrl="profilePicUrl" :key="key" />
+                <ProfilePicBtn :uid_prop="userDoc.uid" @update-profile-pic='updatePicture' />
+                <!--  -->
               </div>
               <v-text-field :rules="[rules.required]" v-model="editedUserDoc.username" label="Username"
                 outlined></v-text-field>
@@ -80,6 +81,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getProfilePic } from '~/lib/storage';
 
 
 const firebaseUser = useFirebaseUser();
@@ -93,8 +95,10 @@ const userDoc = ref();
 const editedUserDoc = ref();
 const dialog = ref(false);
 
+const profilePicUrl = ref();
+
 const rules = ref({
-  required: (value:any) => !!value || "Cannot be empty",
+  required: (value: any) => !!value || "Cannot be empty",
 });
 
 onUpdated(() => editedUserDoc.value = { ...userDoc.value });
@@ -111,7 +115,6 @@ watch(firebaseUser, async () => {
 
 });
 
-
 async function loadContent() {
   if (firebaseUser.value != null) {
     userId = firebaseUser.value?.uid;
@@ -124,6 +127,8 @@ async function loadContent() {
     } else {
       console.log('userId does not exist');
     }
+
+    profilePicUrl.value = await getProfilePic(userId);
 
     authenticated.value = true;
   } else {
@@ -187,10 +192,11 @@ async function getUser(uid: string) {
 
 }
 
+
 const saveProfileChanges = async () => {
   //console.log("saving changes");
 
-  if(editedUserDoc.value.username == '' || editedUserDoc.value.firstname === '' || editedUserDoc.value.lastname === ''){
+  if (editedUserDoc.value.username == '' || editedUserDoc.value.firstname === '' || editedUserDoc.value.lastname === '') {
     //TODO: Put snack bar here to tell user these fields cannot be empty
     return;
   }
@@ -213,6 +219,18 @@ const saveProfileChanges = async () => {
   dialog.value = false;
 };
 
+const key = ref(0);
+
+const updatePicture = async () => {
+  profilePicUrl.value = await getProfilePic(userDoc.value.id);
+  //key.value += 1;
+};
+
+
+provide('picture', {
+  profilePicUrl,
+  updatePicture
+})
 
 
 

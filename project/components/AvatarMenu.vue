@@ -2,16 +2,16 @@
     <v-menu min-width="200px" rounded>
         <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props">
-                <Avatar :user='user' v-bind="props" />
+                <Avatar :user='user' v-bind="props" :profilePictureUrl="profilePicUrl"/>
             </v-btn>
         </template>
         <v-card>
             <v-card-text>
                 <div class="mx-auto text-center">
-                    <Avatar :user='user' />
-                    <h3>{{ user.firstname + " " + user.lastname }}</h3>
+                    <Avatar :user='user' :profilePictureUrl="profilePicUrl"/>
+                    <h3>{{ props.user?.firstname + " " + props.user?.lastname }}</h3>
                     <p class="text-caption mt-1">
-                        {{ user.email }}
+                        {{ props.user?.email }}
                     </p>
                     <v-divider class="my-3"></v-divider>
                     <v-btn variant="text" @click="navigateToProfile">
@@ -31,33 +31,38 @@
 
 <script setup lang="ts">
 
-import { queryCollectionByField, del } from '~/lib/db';
-
-const firebaseUser = useFirebaseUser();
+import { getProfilePic } from '~/lib/storage';
 
 const user = ref();
 
+const profilePicUrl = ref();
 
-if (firebaseUser.value != null) {
-    user.value = await getUser(firebaseUser.value.uid);
-}
+const props = defineProps({
+    user: Object,
+})
 
-async function getUser(uid: string) {
-    try {
-        const doc = await queryCollectionByField("users", "uid", uid);
+profilePicUrl.value = await getProfilePic(props.user?.uid);
 
-        if (doc[0]?.hasOwnProperty('username')) {
-            //console.log(doc[0]);
-            return doc[0];
-        } else {
-            return;
-        }
-    }
-    catch (e) {
-        console.log(e);
-    }
+// if (firebaseUser.value != null) {
+//     props.user?.value = await getUser(firebaseUser.value.uid);
+// }
 
-}
+// async function getUser(uid: string) {
+//     try {
+//         const doc = await queryCollectionByField("users", "uid", uid);
+
+//         if (doc[0]?.hasOwnProperty('username')) {
+//             //console.log(doc[0]);
+//             return doc[0];
+//         } else {
+//             return;
+//         }
+//     }
+//     catch (e) {
+//         console.log(e);
+//     }
+
+// }
 
 async function navigateToProfile() {
     await navigateTo('/profile');
@@ -67,6 +72,8 @@ async function navigateToProfile() {
 async function navigateToFriends() {
     await navigateTo('/friends');
 }
+
+
 
 
 </script>
