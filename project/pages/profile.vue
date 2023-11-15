@@ -43,8 +43,6 @@
         </v-dialog>
       </v-card-actions>
 
-      <!-- <v-text-field v-model="newFriendEmail" label="Friend's Email" outlined></v-text-field>
-    <v-btn @click="addFriend">Add Friend</v-btn> -->
     </v-card>
 
     <v-tabs v-model="tab" align-tabs="start" color="primary">
@@ -80,7 +78,7 @@ import { queryCollectionByField, del } from '~/lib/db';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { getProfilePic } from '~/lib/storage';
 
 
