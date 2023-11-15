@@ -23,7 +23,7 @@
         <v-container class="my-5">
           <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
           <v-card v-for="friend in invitedFriends" :key="friend.id"
-            :to="{ path: '/profile/', query: { friendId: friend.id, fromFriendsPage: 'fromAcceptedPage' } }" class="mb-1">
+            :to="{ path: '/friendsProfile/', query: { friendId: friend.id, fromFriendsPage: 'fromAcceptedPage' } }" class="mb-1">
             <v-card-text class="py-4">
               <h1>
                 {{ friend.username }}
@@ -124,7 +124,7 @@ watch(selected, () => {
 watch(friendObject, async () => {
   if (friendObject.value) {
     await navigateTo({
-      path: '/profile/',
+      path: '/friendsProfile/',
       query: {
         friendId: friendObject.value.uid,
         fromFriendsPage: "fromFriendsPage",
