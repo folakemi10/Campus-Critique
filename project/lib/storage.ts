@@ -1,4 +1,4 @@
-import { getDownloadURL, ref } from "firebase/storage";
+import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "firebase/storage";
 import { storage } from "./firebase";
 
 /**
@@ -22,4 +22,73 @@ export async function getProfilePic(uid: string) {
     catch {
         return "";
     }
+}
+
+/**
+ * Uploads files attached to a review to Firebase Storage
+ * @param reviewId id of review (for folder path name)
+ * @param files list of File objects to upload
+ */
+export async function uploadFiles(reviewId: string, files: File[]) {
+    files.forEach(async f => {
+      console.log(f);
+  
+      // create url and ref
+      const file_url = `reviews/${reviewId}/${f.name}`;
+      const file_ref = ref(storage, file_url);
+
+      // upload file
+      const upload_result = await uploadBytes(file_ref, f);
+      console.log(upload_result);
+    });
+}
+
+/**
+ * Gets files attached to a review from Firebase Storage
+ * @param reviewId id of review containing the files
+ * @returns list of download links
+ */
+export async function getFiles(reviewId: string) {
+    const links: string[] = [];
+
+    // list files in review directory
+    const list_ref = ref(storage, `reviews/${reviewId}`);
+    const file_list = await listAll(list_ref);
+    console.log(file_list);
+    
+    file_list.items.forEach(async r => {
+        const link = await getDownloadURL(r);
+        links.push(link);
+    });
+    return links;
+}
+
+/**
+ * Deletes file(s) attached to a review from Firebase Storage
+ * @param reviewId id of review containing the files
+ * @param file (optional) name of SINGLE FILE to delete. If omitted, deletes all files attached to review.
+ */
+export async function deleteFiles(reviewId: string, file: string = "") {
+    // if single file...
+    if (file != "") {
+        const file_url = `reviews/${reviewId}/${file}`;
+        const file_ref = ref(storage, file_url);
+        try {
+            await deleteObject(file_ref);
+        }
+        catch {
+            console.warn(`File ${file_url} does not exist`);
+        }
+    }
+    // if entire directory...
+    else {
+        // list files in review directory
+        const list_ref = ref(storage, `reviews/${reviewId}`);
+        const file_list = await listAll(list_ref);
+        console.log(file_list);
+
+        file_list.items.forEach(async r => {
+           await deleteObject(r);
+        });
+    }    
 }
