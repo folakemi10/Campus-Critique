@@ -1,5 +1,4 @@
 <template>
-  <GlobalNav />
   <v-container v-if="firebaseUser">
     <v-form @submit.prevent="onSubmit" v-model="valid">
       <v-card class="m-6">
@@ -36,6 +35,10 @@
         </v-container>
       </v-card>
 
+      <v-card class="m-6">
+        <v-file-input show-size chips multiple density="compact" label="Attach files" v-model="selectedFiles"></v-file-input>
+      </v-card>
+
       <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
 
     </v-form>
@@ -46,6 +49,7 @@
 import { queryEntireCollection, set } from "~/lib/db";
 import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue } from "firebase/firestore";
 import { db } from '~/lib/firebase';
+import { uploadFiles } from "~/lib/storage";
 
 //getting prof and class data from db
 const allCourses = ref();
@@ -53,6 +57,7 @@ const allProfessors: Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();
+const selectedFiles: Ref<File[]> = ref([]);
 
 const valid = ref();
 
@@ -157,11 +162,17 @@ async function addPost() {
 
   const colRef = collection(db, "posts");
   const docRef = await addDoc(colRef, review.value);
+  return docRef.id;
 }
 
 async function onSubmit() {
-  if (valid.value) {
-    await addPost();
+  // if (valid.value) {
+  if (true) {
+    const docId = await addPost();
+    console.log(docId);
+    if (selectedFiles.value.length > 0) {
+      uploadFiles(docId, selectedFiles.value);
+    }
     await navigateTo('/');
   } else {
     //alert("All fields required!");
