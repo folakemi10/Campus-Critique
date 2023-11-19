@@ -9,6 +9,7 @@
             </v-btn>
 
             <v-spacer></v-spacer>
+            <!-- <MakeReviewBtn v-if="props.isAuthenticated" :firebaseUser="firebaseUser" :isGeneral="`true`"/> -->
             <AvatarMenu v-if="props.isAuthenticated" :user="user"/>
 
             <div v-if="isAdmin">

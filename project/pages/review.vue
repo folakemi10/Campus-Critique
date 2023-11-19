@@ -1,50 +1,67 @@
 <template>
-  <GlobalNav />
-  <v-container v-if="firebaseUser">
-    <v-form @submit.prevent="onSubmit" v-model="valid">
-      <v-card class="m-6">
-        <v-card-title>Rate: {{ reviewedObjectName ? reviewedObjectName : 'Loading...' }} </v-card-title>
-        <!-- <v-radio-group v-model="typeSelection" inline @input="onChange()" :rules="rules.required">
+  <div>
+    <div class="text-center" v-if="loading">
+      <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
+    </div>
+    <v-container v-if="!loading">
+      <v-form @submit.prevent="onSubmit" v-model="valid">
+        <v-card class="m-6">
+          <v-card-title>Rate: {{ reviewedObjectName ? reviewedObjectName : 'Loading...' }} </v-card-title>
+          <!-- <v-radio-group v-model="typeSelection" inline @input="onChange()" :rules="rules.required">
           <v-radio label="Course" value="course"></v-radio>
           <v-radio label="Professor" value="professor"></v-radio>
         </v-radio-group> -->
-      </v-card>
+        </v-card>
 
-      <v-card class="m-6" v-if="reviewedObject == 'course'">
-        <v-card-title> Which professor taught this course? </v-card-title>
-        <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
-          item-text="firstname" item-value="id" return-object></v-autocomplete>
-      </v-card>
+        <v-card class="m-6" v-if="reviewedObject == 'course'">
+          <v-card-title> Which professor taught this course? </v-card-title>
+          <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+            item-text="firstname" item-value="id" return-object></v-autocomplete>
+        </v-card>
 
 
-      <v-card class="m-6" v-if="reviewedObject == 'professor'">
-        <v-card-title>Which course did you take with this professor? </v-card-title>
-        <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
-          return-object></v-autocomplete>
-      </v-card>
+        <v-card class="m-6" v-if="reviewedObject == 'professor'">
+          <v-card-title>Which course did you take with this professor? </v-card-title>
+          <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+            return-object></v-autocomplete>
+        </v-card>
 
-      <v-card class="m-6">
-        <v-card-title>How would you rate this{{ reviewedObject == 'course' ? ' class' : ' professor' }}? </v-card-title>
-        <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
-      </v-card>
+        <v-card class="m-6">
+          <v-card-title>How would you rate this{{ reviewedObject == 'course' ? ' class' : ' professor' }}? </v-card-title>
+          <v-rating hover v-model="review.rating" :rules="rules.required" clearable></v-rating>
+        </v-card>
 
-      <v-card class="m-6">
-        <v-card-title>Write a Review: </v-card-title>
-        <v-container fluid>
-          <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
-            v-model="review.textReview"></v-textarea>
-        </v-container>
-      </v-card>
+        <v-card class="m-6">
+          <v-card-title>Write a Review: </v-card-title>
+          <v-container fluid>
+            <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
+              v-model="review.textReview"></v-textarea>
+          </v-container>
+        </v-card>
 
-      <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+        <v-card class="m-6">
+          <v-card-title>Add Attachments: </v-card-title>
+          <v-card-subtitle>Any files attached to this review can be viewed by all your friends.</v-card-subtitle>
 
-    </v-form>
-  </v-container>
+          <v-card-actions>
+            <v-btn density="comfortable" @click="addMedia" icon="mdi-attachment"></v-btn>
+          </v-card-actions>
+
+          <v-container fluid>
+
+          </v-container>
+        </v-card>
+
+        <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+
+      </v-form>
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { queryEntireCollection, set } from "~/lib/db";
-import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue, Firestore } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 
 //getting prof and class data from db
@@ -57,31 +74,50 @@ const selectedProf = ref();
 const valid = ref();
 
 //check user auth + userId
-const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value?.uid;
+const firebaseUser = ref();
+const userId = ref();
+const authenticated = ref();
+const loading = ref(true);
 
 const reviewedObject = ref('');
 const reviewedObjectId = String(useRoute().query.id);
-const reviewedObjectName = await getObject(reviewedObjectId);
+const reviewedObjectName = ref();
+
+onMounted(async () => {
+  firebaseUser.value = useAttrs().user;
+  authenticated.value = useAttrs().isAuthenticated;
+  await loadContent();
+  if (!authenticated) {
+    navigateTo("/");
+  }
+});
 
 watch(firebaseUser, async () => {
   await loadContent();
 });
 
-onMounted(async () => {
-  await loadContent();
-});
-
 async function loadContent() {
-  allCourses.value = await queryEntireCollection('classes');
-  const professorsRef = await queryEntireCollection('profs');
+  loading.value = true;
 
-  professorsRef.forEach((doc: any) => {
-    const title = doc.firstname + " " + doc.lastname;
-    doc = { ...doc, title };
+  if (firebaseUser.value !== null) {
+    userId.value = firebaseUser.value?.uid;
 
-    allProfessors.value.push(doc);
-  });
+    allCourses.value = await queryEntireCollection('classes');
+    const professorsRef = await queryEntireCollection('profs');
+
+    professorsRef.forEach((doc: any) => {
+      const title = doc.firstname + " " + doc.lastname;
+      doc = { ...doc, title };
+
+      allProfessors.value.push(doc);
+    });
+
+    reviewedObjectName.value = await getObject(reviewedObjectId);
+  } else {
+    authenticated.value = false;
+  }
+
+  loading.value = false;
 }
 
 
@@ -111,24 +147,9 @@ const review = ref({
 })
 
 
-
-//rules for all questions in the review form
 const rules = ref({
   required: [(value: string) => !!value || "This question is required"],
 });
-
-// definePageMeta({
-//   middleware: function (to, from) {
-//     const user = useFirebaseUser();
-
-//     if (!user.value) {
-//       return navigateTo('/');
-//     }
-//   },
-// });
-
-
-
 
 
 async function getObject(id: string) {
@@ -168,6 +189,10 @@ async function onSubmit() {
 
     //TODO: ADD SNACKBAR HERE THAT ALERTS THE USER THEY NEED TO COMPLETE ALL PARTS OF THE FORM
   }
+}
+
+function addMedia() {
+  
 }
 
 

@@ -11,6 +11,7 @@ const firebaseUser = useFirebaseUser();
 const props = defineProps({
   reviewedObjectId: String,
   reviewedObject: String,
+  isGeneral: String,
 });
 
 async function onClick() {
