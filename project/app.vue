@@ -2,7 +2,7 @@
     <div>
         <GlobalNav :isAuthenticated='isAuthenticated' />
         <NuxtLayout>
-            <NuxtPage />
+            <NuxtPage :key="key" :user="user" :isAuthenticated='isAuthenticated'/>
         </NuxtLayout>
     </div>
 </template>
@@ -19,6 +19,7 @@ const user = ref();
 
 const isAuthenticated = ref(false);
 
+const key = ref(0);
 
 
 onMounted(() => {
@@ -30,11 +31,15 @@ watch(firebaseUser, (newVal, oldVal) => {
     if (newVal) {
         checkAdmin();
     }
+    
 });
+
+watch(user, ()=>{
+    key.value+=1;
+})
 
 async function setAuthentication() {
     if (firebaseUser.value !== null) {
-
         isAuthenticated.value = true;
     } else {
         isAuthenticated.value = false;

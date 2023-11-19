@@ -102,3 +102,18 @@ export async function queryOrderedCollection(col: string, field: string, queryDi
 
   return docs;
 }
+
+export async function getUser(uid: string) {
+  try {
+    const doc = await queryCollectionByField("users", "uid", uid);
+
+    if (doc[0]?.hasOwnProperty('username')) {
+      return doc[0];
+    } else {
+      return;
+    }
+  }
+  catch (e) {
+    console.log(e);
+  }
+}
