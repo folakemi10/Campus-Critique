@@ -16,7 +16,6 @@
 
         <v-btn text="Edit Profile" variant="outlined" @click="dialog = true"> </v-btn>
 
-
         <v-dialog width="500" v-model="dialog">
           <v-card title="Edit Profile">
 
@@ -72,12 +71,11 @@
 </template>
 
 <script setup lang="ts">
-import { queryCollectionByField, del } from '~/lib/db';
+import { queryCollectionByField, del, getUser } from '~/lib/db';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
 import { doc, updateDoc } from "firebase/firestore";
-import { getProfilePic } from '~/lib/storage';
 
 
 const firebaseUser = useFirebaseUser();
@@ -139,7 +137,7 @@ const tabItems = computed(() => {
 });
 
 async function deletePost(id: string) {
-   
+
   //console.log("delete post");
   try {
     await del("posts", id);
@@ -175,24 +173,6 @@ const closeEditModal = async (editedReview: any) => {
 };
 
 
-
-async function getUser(uid: string) {
-  try {
-    const doc = await queryCollectionByField("users", "uid", uid);
-
-    if (doc[0]?.hasOwnProperty('username')) {
-      return doc[0];
-    } else {
-      return;
-    }
-  }
-  catch (e) {
-    console.log(e);
-  }
-
-}
-
-
 const saveProfileChanges = async () => {
   //console.log("saving changes");
 
@@ -219,7 +199,7 @@ const saveProfileChanges = async () => {
   dialog.value = false;
 };
 
-const {profilePicUrl, updatePicture} = inject('picture') as any;
+const { profilePicUrl, updatePicture } = inject('picture') as any;
 
 
 </script>

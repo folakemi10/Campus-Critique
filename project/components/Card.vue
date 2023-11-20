@@ -4,7 +4,8 @@
       <v-row align-items="start">
         <v-col cols="auto">
           <!-- User who made the post -->
-          <v-card-subtitle> {{ username }} &#183; {{ review?.modifiedAt ? formatDate(review?.modifiedAt) : "No date"}} </v-card-subtitle>
+          <v-card-subtitle> {{ username }} &#183; {{ review?.modifiedAt ? formatDate(review?.modifiedAt) : "No date" }}
+          </v-card-subtitle>
         </v-col>
 
 
@@ -44,6 +45,7 @@
     <v-card-text>
       <div>{{ review?.textReview }}</div>
     </v-card-text>
+
   </v-card>
 </template>
 
@@ -170,7 +172,8 @@ function formatDate(date: any) {
   const year = jsDate.getFullYear();
 
   return day + ' ' + month + ' ' + year;
-
 }
+
+
 
 </script>

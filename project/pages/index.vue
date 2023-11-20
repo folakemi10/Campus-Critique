@@ -1,29 +1,31 @@
 <template>
-  <div class="text-center">
-    <v-progress-circular model-value="20" color="primary"  indeterminate v-if="loading"></v-progress-circular>
+  <div>
+    <div class="text-center"  v-if="loading">
+      <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
+    </div>
+
+    <v-container v-if="!authenticated && !loading">
+      <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
+        Welcome to Campus Critique!</h1>
+
+      <v-btn color="primary-button" to="/register">
+        Join Us
+      </v-btn>
+    </v-container>
+
+    <v-container v-if="authenticated && !loading" class="flex-vertical justify-center">
+      <Search />
+      <!-- <ClientOnly> -->
+      <Card v-for="(review, index) in allPosts" :key="index" :review="review" :showChangeBtns="false"></Card>
+      <!-- </ClientOnly> -->
+    </v-container>
   </div>
-
-  <v-container v-if="!authenticated && !loading">
-    <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-      Welcome to Campus Critique!</h1>
-
-    <v-btn color="primary-button" to="/register">
-      Join Us
-    </v-btn>
-  </v-container>
-
-  <v-container v-if="authenticated && !loading" class="flex-vertical justify-center">
-    <Search />
-    <!-- <ClientOnly> -->
-    <Card v-for="(review, index) in allPosts" :key="index" :review="review" :showChangeBtns="false"></Card>
-    <!-- </ClientOnly> -->
-  </v-container>
 </template>
 
 
   
 <script setup lang="ts">
-import { queryEntireCollection, queryOrderedCollection} from "~/lib/db";
+import { queryEntireCollection, queryOrderedCollection } from "~/lib/db";
 
 // data
 const firebaseUser = useFirebaseUser();
@@ -38,7 +40,7 @@ const selected = ref();
 
 onMounted(async () => {
   await loadContent();
-  if(!authenticated){
+  if (!authenticated) {
     navigateTo("/");
   }
 });

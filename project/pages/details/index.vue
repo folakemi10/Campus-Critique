@@ -1,24 +1,26 @@
 <template>
-  <!-- If user is logged in, display all the posts for the class -->
-  <div class="text-center">
-    <v-progress-circular model-value="20" color="primary" indeterminate v-if="loading"></v-progress-circular>
-  </div>
+  <div>
+    <!-- If user is logged in, display all the posts for the class -->
+    <div class="text-center"  v-if="loading">
+      <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
+    </div>
 
-  <v-container v-if="!loading">
-    <v-card>
-      <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
-      <v-card-title>{{ ratingDisplay(calculateAverage()) }}</v-card-title>
-      <v-card-actions>
-        <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
-      </v-card-actions>
-    </v-card>
+    <v-container v-if="!loading">
+      <v-card>
+        <v-card-title>{{ currentObjectName ? currentObjectName : 'Loading...' }}</v-card-title>
+        <v-card-title>{{ ratingDisplay(calculateAverage()) }}</v-card-title>
+        <v-card-actions>
+          <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
+        </v-card-actions>
+      </v-card>
 
-    <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
+      <Card v-for="(review, index) in specificPosts" :key="index" :review="review"></Card>
 
-    <v-container v-if="!firebaseUser">
-      Sign in to view what others have to say about {{ currentObjectName }}
+      <v-container v-if="!firebaseUser">
+        Sign in to view what others have to say about {{ currentObjectName }}
+      </v-container>
     </v-container>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -68,7 +70,7 @@ async function loadContent() {
     currentObjectName.value = await getObject(reviewedObjectId);
 
     authenticated.value = true;
-  }else{
+  } else {
     authenticated.value = false;
   }
 
