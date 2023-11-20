@@ -20,7 +20,7 @@ export default {
             console.log("Profile Pic Button Clicked");
             if (this.uid_prop != "") {
                 document.getElementById("profile_pic_input")?.click(); // trigger hidden file input box
-                
+
             }
             else {
                 console.warn("...but no uid found in uid_prop");

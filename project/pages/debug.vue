@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { auth_status } from '~/composables/auth';
-import { getProfilePic } from '~/lib/storage';
+import { getFiles, getProfilePic } from '~/lib/storage';
 
 export default {
 data() {
@@ -65,6 +65,9 @@ methods: {
     },
     async get_pfp() {
         this.image_url = await getProfilePic(this.uid);
+    },
+    async get_files() {
+        await getFiles("gMnhQ8plOk9OUZNj4TBw");
     }
 },
 watch: {
@@ -72,6 +75,7 @@ watch: {
         if (newValue) {
            this.uid = this.firebaseUser?.uid as string;
            this.get_pfp();
+           this.get_files();
         }
     }
 }

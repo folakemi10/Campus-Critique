@@ -45,6 +45,14 @@
 
           <v-card-actions>
             <v-btn density="comfortable" @click="addMedia" icon="mdi-attachment"></v-btn>
+            <div>
+              <label for="fileInput">Choose a file:</label>
+              <input id="fileInput" type="file" @change="handleFileChange" ref="fileInput" />
+              <div v-if="selectedFile">
+                <p>Selected File: {{ selectedFile.name }}</p>
+                <button @click="clearFile">Clear File</button>
+              </div>
+            </div>
           </v-card-actions>
 
           <v-container fluid>
@@ -60,9 +68,27 @@
 </template>
 
 <script setup lang="ts">
+const selectedFile:any = ref(null);
+
+const fileInput = ref('');
+
+const handleFileChange = (event:any) => {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFile.value = file;
+  }
+};
+
+const clearFile = () => {
+  selectedFile.value = null;
+  // Access the file input using the created ref
+  fileInput.value = '';
+};
+
 import { queryEntireCollection, set } from "~/lib/db";
 import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue, Firestore } from "firebase/firestore";
 import { db } from '~/lib/firebase';
+import { uploadFiles } from "~/lib/storage";
 
 //getting prof and class data from db
 const allCourses = ref();
@@ -70,6 +96,7 @@ const allProfessors: Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();
+const selectedFiles: Ref<File[]> = ref([]);
 
 const valid = ref();
 
@@ -178,11 +205,17 @@ async function addPost() {
 
   const colRef = collection(db, "posts");
   const docRef = await addDoc(colRef, review.value);
+  return docRef.id;
 }
 
 async function onSubmit() {
-  if (valid.value) {
-    await addPost();
+  // if (valid.value) {
+  if (true) {
+    const docId = await addPost();
+    console.log(docId);
+    if (selectedFiles.value.length > 0) {
+      uploadFiles(docId, selectedFiles.value);
+    }
     await navigateTo('/');
   } else {
     //alert("All fields required!");
@@ -192,7 +225,7 @@ async function onSubmit() {
 }
 
 function addMedia() {
-  
+
 }
 
 
