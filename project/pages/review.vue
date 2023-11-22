@@ -34,7 +34,7 @@
         <v-card class="m-6">
           <v-card-title>Write a Review: </v-card-title>
           <v-container fluid>
-            <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow :rules="rules.required"
+            <v-textarea variant="filled" label="Write your review" auto-grow :rules="rules.required"
               v-model="review.textReview"></v-textarea>
           </v-container>
         </v-card>
@@ -44,16 +44,20 @@
           <v-card-subtitle>Any files attached to this review can be viewed by all your friends.</v-card-subtitle>
 
           <v-card-actions>
-            <v-btn density="comfortable" @click="addMedia" icon="mdi-attachment"></v-btn>
-            <div>
-              <label for="fileInput">Choose a file:</label>
-              <input id="fileInput" type="file" @change="handleFileChange" ref="fileInput" />
-              <div v-if="selectedFile">
-                <p>Selected File: {{ selectedFile.name }}</p>
-                <button @click="clearFile">Clear File</button>
-              </div>
-            </div>
+            <v-file-input v-model="selectedFiles" color="primary" label="Upload Files" placeholder="Select your files"
+              prepend-icon="mdi-paperclip" variant="outlined" multiple clearable>
+            </v-file-input>
+
+            <v-btn @click="addFiles">
+              Add Files
+            </v-btn>
           </v-card-actions>
+          <v-card-item>
+            <v-chip-group>
+              <FileChip v-for="(file, index) in allFiles" :key="index" :icon="`mdi-close-circle-outline`"
+                :fileName="file.name" @click="removeFile(index)" />
+            </v-chip-group>
+          </v-card-item>
 
           <v-container fluid>
 
@@ -68,22 +72,22 @@
 </template>
 
 <script setup lang="ts">
-const selectedFile:any = ref(null);
 
-const fileInput = ref('');
+function addFiles() {
+  //concatenate the currently selected ones to the list of all files
+  const concatenatedFiles = [...allFiles.value, ...selectedFiles.value];
+  //set the concatenated list to be the allFiles value
+  allFiles.value = concatenatedFiles;
+  //reset the currently selected files
+  selectedFiles.value = [];
+  //console.log(allFiles.value);
+}
 
-const handleFileChange = (event:any) => {
-  const file = event.target.files[0];
-  if (file) {
-    selectedFile.value = file;
-  }
-};
 
-const clearFile = () => {
-  selectedFile.value = null;
-  // Access the file input using the created ref
-  fileInput.value = '';
-};
+function removeFile(index: any) {
+  // Remove the clicked file from the allFiles array
+  allFiles.value.splice(index, 1);
+}
 
 import { queryEntireCollection, set } from "~/lib/db";
 import { addDoc, collection, doc, getDoc, getDocs, query, where, serverTimestamp, FieldValue, Firestore } from "firebase/firestore";
@@ -96,6 +100,9 @@ const allProfessors: Ref<string[]> = ref([]);
 
 const selectedClass = ref();
 const selectedProf = ref();
+
+
+const allFiles: Ref<File[]> = ref([]);
 const selectedFiles: Ref<File[]> = ref([]);
 
 const valid = ref();
@@ -130,8 +137,8 @@ async function loadContent() {
     userId.value = firebaseUser.value?.uid;
 
     allCourses.value = await queryEntireCollection('classes');
-    const professorsRef = await queryEntireCollection('profs');
 
+    const professorsRef = await queryEntireCollection('profs');
     professorsRef.forEach((doc: any) => {
       const title = doc.firstname + " " + doc.lastname;
       doc = { ...doc, title };
@@ -209,23 +216,31 @@ async function addPost() {
 }
 
 async function onSubmit() {
-  // if (valid.value) {
-  if (true) {
-    const docId = await addPost();
-    console.log(docId);
-    if (selectedFiles.value.length > 0) {
-      uploadFiles(docId, selectedFiles.value);
+  //if valid is true (meaning all the required questions of the form were filled out)
+  if (valid.value) {
+    try {
+      //add the post to the posts collection and return the document id
+      const docId = await addPost();
+
+      //if allFiels contains files, upload them to storage according to the post's id
+      if (allFiles.value.length > 0) {
+        uploadFiles(docId, allFiles.value);
+      }
+
+      //navigate back to homepage
+      await navigateTo('/');
+
+      //console.log(docId);
+    } catch (e) {
+      //catch any errors
+      console.log(e);
+      //TODO: ADD SNACKBAR HERE TO ALERT USER OF SUBMISSION ERROR
     }
-    await navigateTo('/');
+
   } else {
-    //alert("All fields required!");
-
     //TODO: ADD SNACKBAR HERE THAT ALERTS THE USER THEY NEED TO COMPLETE ALL PARTS OF THE FORM
+
   }
-}
-
-function addMedia() {
-
 }
 
 

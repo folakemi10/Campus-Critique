@@ -28,8 +28,8 @@
 import { queryEntireCollection, queryOrderedCollection } from "~/lib/db";
 
 // data
-const firebaseUser = useFirebaseUser();
-const authenticated = ref(false);
+const firebaseUser = ref();
+const authenticated = ref();
 const loading = ref(true);
 
 const allPosts = ref();
@@ -39,6 +39,8 @@ const selected = ref();
 
 
 onMounted(async () => {
+  firebaseUser.value = useAttrs().user;
+  authenticated.value = useAttrs().isAuthenticated;
   await loadContent();
   if (!authenticated) {
     navigateTo("/");
@@ -56,12 +58,12 @@ async function loadContent() {
     // console.log("User exists, Loading Data");
 
     allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
+    //console.log(allPosts.value);
 
-    allCourses.value = await queryEntireCollection('classes');
+    //allCourses.value = await queryEntireCollection('classes');
+    //console.log(allCourses.value);
 
-    allProfessors.value = await queryEntireCollection('profs');
-
-    authenticated.value = true;
+    //allProfessors.value = await queryEntireCollection('profs');
   }
   else {
     //console.log("No User, Clearing Data");
@@ -72,14 +74,14 @@ async function loadContent() {
 }
 
 // watch works directly on a ref
-watch(selected, async () => {
-  await navigateTo({
-    path: '/details/',
-    query: {
-      id: selected.value.id,
-    },
-    replace: true,
-  })
-})
+// watch(selected, async () => {
+//   await navigateTo({
+//     path: '/details/',
+//     query: {
+//       id: selected.value.id,
+//     },
+//     replace: true,
+//   })
+// })
 
 </script>

@@ -46,6 +46,15 @@
       <div>{{ review?.textReview }}</div>
     </v-card-text>
 
+    <v-card-actions>
+      <v-chip-group>
+        <FileChip v-for="(attachment, index) in attachments" :key="index" :icon="`mdi-download`"
+          :fileName="attachment.metadata.name" :downloadLink="attachment.link">
+          {{ attachment.metadata.name }}
+        </FileChip>
+      </v-chip-group>
+
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -55,6 +64,7 @@
 import { queryCollectionByField, del } from '~/lib/db';
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
+import { getFiles } from '~/lib/storage';
 
 const props = defineProps({
   review: Object,
@@ -72,6 +82,14 @@ const props = defineProps({
 const username = await getUsername(props.review?.uid);
 const course = await getCourse(props.review?.class, props.review?.reviewedObject);
 const prof = await getProf(props.review?.professor, props.review?.reviewedObject);
+
+const attachments:any = await getAttachments(props.review?.id);
+
+async function getAttachments(reviewId: any) {
+  const files = await getFiles(reviewId);
+  //console.log(files);
+  return files;
+}
 
 
 async function getUsername(uid: string) {

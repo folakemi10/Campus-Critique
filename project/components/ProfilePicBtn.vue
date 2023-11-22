@@ -17,7 +17,7 @@ export default {
     },
     methods: {
         buttonHandler() {
-            console.log("Profile Pic Button Clicked");
+            //console.log("Profile Pic Button Clicked");
             if (this.uid_prop != "") {
                 document.getElementById("profile_pic_input")?.click(); // trigger hidden file input box
 
