@@ -79,18 +79,32 @@ const props = defineProps({
   },
 });
 
-const username = await getUsername(props.review?.uid);
-const course = await getCourse(props.review?.class, props.review?.reviewedObject);
-const prof = await getProf(props.review?.professor, props.review?.reviewedObject);
+const username = ref();
+const course = ref();
+const prof = ref();
 
-const attachments:any = await getAttachments(props.review?.id);
+
+onMounted(async () => {
+  username.value = await getUsername(props.review?.uid);
+  course.value = await getCourse(props.review?.class, props.review?.reviewedObject);
+  prof.value = await getProf(props.review?.professor, props.review?.reviewedObject);
+})
+
+
+const attachments: Ref<any[]> = ref([]);
 
 async function getAttachments(reviewId: any) {
   const files = await getFiles(reviewId);
-  //console.log(files);
   return files;
 }
 
+
+onUpdated(async () => {
+  if (props.review) {
+    attachments.value = await getAttachments(props.review.id);
+  }
+
+});
 
 async function getUsername(uid: string) {
   const doc = await queryCollectionByField("users", "uid", uid);
@@ -127,7 +141,7 @@ async function getCourse(courseCode: string, reviewedObject: string) {
 
   }
   else {
-    const courseDocRef = doc(db, 'classes', courseCode); // 'courses' is the name of the Firestore collection where course information is stored
+    const courseDocRef = doc(db, 'classes', courseCode);
     const courseDoc = await getDoc(courseDocRef);
 
     interface Course {
@@ -135,13 +149,12 @@ async function getCourse(courseCode: string, reviewedObject: string) {
       title: string;
     }
     if (courseDoc.exists()) {
-      //console.log(courseDoc.data());
       if (courseDoc.data().title) {
         const courseData = courseDoc.data();
         return courseData.title;
       }
     } else {
-      return 'CSE 132'; //not in database but looks fine to users 
+      return 'Unknown Course'; //not in database but looks fine to users 
     }
   }
 }
@@ -163,7 +176,7 @@ async function getProf(prof: string, reviewedObject: string) {
     else return reviewedObject;
   }
   else {
-    const professorDocRef = doc(db, 'profs', prof);
+    const professorDocRef = doc(collection(db, 'profs'), prof);
     const professorDoc = await getDoc(professorDocRef);
 
     if (professorDoc.exists()) {

@@ -41,11 +41,12 @@ export async function queryEntireCollection(col: string) {
 export async function queryCollectionByField(
   col: string,
   field: string,
-  value: Object
+  value: any
 ) {
   const colRef = collection(db, col);
 
   const q = query(colRef, where(field, "==", value));
+
   const docs = await getDocs(q);
 
   const result = Array.from(docs.docs).map((doc) => {

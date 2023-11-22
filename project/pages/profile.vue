@@ -57,7 +57,8 @@
 
         </v-container>
 
-        <EditPostModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
+        <EditPostModal v-model="isActive" :active="isActive" :reviewToEdit="reviewToEdit"
+          @close-edit-modal="closeEditModal" />
       </v-window-item>
 
 
@@ -76,10 +77,11 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
 import { doc, updateDoc } from "firebase/firestore";
+import { deleteFiles } from '~/lib/storage';
 
 
 const firebaseUser = ref();
-let userId = ref();
+const userId = ref();
 
 const authenticated = ref();
 
@@ -111,17 +113,15 @@ interface Post {
   // Other properties of a post
 }
 
-onUpdated(() => editedUserDoc.value = { ...userDoc.value });
-
 const allPosts = ref<Post[]>([]);
 
 async function loadContent() {
   if (firebaseUser.value != null) {
-    userId = firebaseUser.value?.uid;
+    userId.value = firebaseUser.value?.uid;
     userDoc.value = firebaseUser.value;
 
-    if (userId) {
-      allPosts.value = await queryCollectionByField("posts", "uid", userId);
+    if (userId.value) {
+      allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
     } else {
       console.log('userId does not exist');
     }
@@ -144,14 +144,13 @@ async function deletePost(id: string) {
 
   //console.log("delete post");
   try {
+    //delete actual post document
     await del("posts", id);
+    //delete files associated with post in storage
+    await deleteFiles(id);
+    //refresh posts
+    allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
 
-    allPosts.value = await queryCollectionByField("posts", "uid", userId);
-
-    // const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
-    // if (postIndex !== -1) {
-    //   allPosts.value.splice(postIndex, 1); // Remove the card from the array
-    // }
   } catch (e) {
     console.log(e);
   }
@@ -166,7 +165,8 @@ const openEditModalForReview = (review: any) => {
 };
 
 const closeEditModal = async (editedReview: any) => {
-  allPosts.value = await queryCollectionByField("posts", "uid", userId);
+  console.log("refreshing after close");
+  allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
   isActive.value = false;
 };
 

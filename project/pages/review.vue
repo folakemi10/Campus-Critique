@@ -113,7 +113,7 @@ const userId = ref();
 const authenticated = ref();
 const loading = ref(true);
 
-const reviewedObject = ref('');
+const reviewedObject = ref();
 const reviewedObjectId = String(useRoute().query.id);
 const reviewedObjectName = ref();
 
@@ -187,14 +187,18 @@ const rules = ref({
 
 
 async function getObject(id: string) {
+ // console.log("getting object");
   const courseDocRef = doc(db, 'classes', id);
   const profDocRef = doc(db, 'profs', id);
 
   const courseDoc = await getDoc(courseDocRef);
   const profDoc = await getDoc(profDocRef);
 
+  console.log(reviewedObject.value);
+
   if (courseDoc.exists()) {
     reviewedObject.value = "course";
+    
     return courseDoc.data().title;
   }
   if (profDoc.exists()) {

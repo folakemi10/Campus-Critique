@@ -2,7 +2,7 @@
     <div>
         <GlobalNav :isAuthenticated='isAuthenticated' />
         <NuxtLayout>
-            <NuxtPage :key="key" :user="user" :isAuthenticated='isAuthenticated'/>
+            <NuxtPage :key="key" :user="user" :isAuthenticated='isAuthenticated' />
         </NuxtLayout>
     </div>
 </template>
@@ -23,6 +23,7 @@ const key = ref(0);
 
 
 onMounted(() => {
+    //console.log(user.value);
     checkAdmin();
 });
 
@@ -31,24 +32,27 @@ watch(firebaseUser, (newVal, oldVal) => {
     if (newVal) {
         checkAdmin();
     }
-    
+
 });
 
-watch(user, ()=>{
-    key.value+=1;
+watch(user, () => {
+    key.value += 1;
 })
 
 async function setAuthentication() {
     if (firebaseUser.value !== null) {
         isAuthenticated.value = true;
     } else {
+        user.value = null;
         isAuthenticated.value = false;
     }
 }
 
 
 async function checkAdmin() {
+    //console.log(firebaseUser.value);
     if (!firebaseUser.value) {
+        user.value = firebaseUser.value;
         isAuthenticated.value = false;
         return false;
     }
@@ -59,6 +63,7 @@ async function checkAdmin() {
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             console.warn(`users document ${uid} does not exist`);
+            user.value = firebaseUser.value;
             return false;
         }
 
@@ -70,9 +75,7 @@ async function checkAdmin() {
         else {
             isAdmin.value = false;
         };
-    } else {
     }
-
 
 }
 
