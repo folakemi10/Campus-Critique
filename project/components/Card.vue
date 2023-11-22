@@ -84,19 +84,20 @@ const course = ref();
 const prof = ref();
 
 
-onMounted(async () => {
-  username.value = await getUsername(props.review?.uid);
-  course.value = await getCourse(props.review?.class, props.review?.reviewedObject);
-  prof.value = await getProf(props.review?.professor, props.review?.reviewedObject);
-})
-
-
 const attachments: Ref<any[]> = ref([]);
 
 async function getAttachments(reviewId: any) {
   const files = await getFiles(reviewId);
   return files;
 }
+
+
+onMounted(async () => {
+  username.value = await getUsername(props.review?.uid);
+  course.value = await getCourse(props.review?.class, props.review?.reviewedObject);
+  prof.value = await getProf(props.review?.professor, props.review?.reviewedObject);
+  attachments.value = await getFiles(props.review?.id);
+})
 
 
 onUpdated(async () => {
