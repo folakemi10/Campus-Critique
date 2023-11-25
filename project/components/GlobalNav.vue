@@ -1,7 +1,7 @@
 <template>
     <v-card color="grey-lighten-4" flat rounded="0">
         <v-toolbar>
-            <v-btn to="/">
+            <v-btn to="/" variant="plain"  :ripple="false">
                 <v-toolbar-title>
                     <v-icon icon="mdi-message-draw"></v-icon>
                     Campus Critique

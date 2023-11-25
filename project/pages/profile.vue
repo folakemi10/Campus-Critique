@@ -16,6 +16,7 @@
 
         <v-btn text="Edit Profile" variant="outlined" @click="dialog = true"> </v-btn>
 
+        <!-- EDIT PROFILE MODAL -->
         <v-dialog width="500" v-model="dialog">
           <v-card title="Edit Profile">
 
@@ -23,7 +24,6 @@
               <div class="flex items-center">
                 <Avatar class="mr-4" size="64" :user='userDoc' />
                 <ProfilePicBtn :uid_prop="userDoc.uid" @update-profile-pic='updatePicture' />
-                <!--  -->
               </div>
               <v-text-field :rules="[rules.required]" v-model="editedUserDoc.username" label="Username"
                 outlined></v-text-field>
@@ -57,7 +57,8 @@
 
         </v-container>
 
-        <EditPostModal v-model="isActive" :reviewToEdit="reviewToEdit" @close-edit-modal="closeEditModal" />
+        <EditPostModal v-model="isActive" :active="isActive" :reviewToEdit="reviewToEdit"
+          @close-edit-modal="closeEditModal" />
       </v-window-item>
 
 
@@ -76,12 +77,13 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
 import { doc, updateDoc } from "firebase/firestore";
+import { deleteFiles } from '~/lib/storage';
 
 
-const firebaseUser = useFirebaseUser();
-let userId = "";
+const firebaseUser = ref();
+const userId = ref();
 
-const authenticated = ref(false);
+const authenticated = ref();
 
 const userDoc = ref();
 const editedUserDoc = ref();
@@ -91,9 +93,11 @@ const rules = ref({
   required: (value: any) => !!value || "Cannot be empty",
 });
 
-onUpdated(() => editedUserDoc.value = { ...userDoc.value });
+
 
 onMounted(async () => {
+  firebaseUser.value = useAttrs().user;
+  authenticated.value = useAttrs().isAuthenticated;
   await loadContent();
   if (!authenticated) {
     navigateTo("/");
@@ -113,11 +117,11 @@ const allPosts = ref<Post[]>([]);
 
 async function loadContent() {
   if (firebaseUser.value != null) {
-    userId = firebaseUser.value?.uid;
-    userDoc.value = await getUser(userId);
+    userId.value = firebaseUser.value?.uid;
+    userDoc.value = firebaseUser.value;
 
-    if (userId) {
-      allPosts.value = await queryCollectionByField("posts", "uid", userId);
+    if (userId.value) {
+      allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
     } else {
       console.log('userId does not exist');
     }
@@ -140,14 +144,13 @@ async function deletePost(id: string) {
 
   //console.log("delete post");
   try {
+    //delete actual post document
     await del("posts", id);
+    //delete files associated with post in storage
+    await deleteFiles(id);
+    //refresh posts
+    allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
 
-    allPosts.value = await queryCollectionByField("posts", "uid", userId);
-
-    // const postIndex = allPosts.value.findIndex((p: { id: any; }) => p.id === id);
-    // if (postIndex !== -1) {
-    //   allPosts.value.splice(postIndex, 1); // Remove the card from the array
-    // }
   } catch (e) {
     console.log(e);
   }
@@ -162,13 +165,8 @@ const openEditModalForReview = (review: any) => {
 };
 
 const closeEditModal = async (editedReview: any) => {
-  allPosts.value = await queryCollectionByField("posts", "uid", userId);
-
-  // const index = allPosts.value.findIndex((review: any) => review.id === editedReview.id);
-
-  // if (index !== -1) {
-  //   allPosts.value[index] = editedReview;
-  // }
+  console.log("refreshing after close");
+  allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
   isActive.value = false;
 };
 
@@ -182,14 +180,14 @@ const saveProfileChanges = async () => {
   }
 
   try {
-    const docRef = doc(db, "users", userId);
+    const docRef = doc(db, "users", userId.value);
     await updateDoc(docRef, {
       username: editedUserDoc.value.username,
       firstname: editedUserDoc.value.firstname,
       lastname: editedUserDoc.value.lastname,
     });
 
-    userDoc.value = await getUser(userId);
+    userDoc.value = await getUser(userId.value);
 
   }
   catch (e) {

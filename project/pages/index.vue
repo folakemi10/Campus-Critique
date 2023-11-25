@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center"  v-if="loading">
+    <div class="text-center" v-if="loading">
       <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
     </div>
 
@@ -22,23 +22,22 @@
   </div>
 </template>
 
-
-  
 <script setup lang="ts">
 import { queryEntireCollection, queryOrderedCollection } from "~/lib/db";
 
 // data
-const firebaseUser = useFirebaseUser();
-const authenticated = ref(false);
+const firebaseUser: any | null = ref(null);
+const authenticated = ref();
 const loading = ref(true);
 
 const allPosts = ref();
 const allCourses = ref();
 const allProfessors = ref();
-const selected = ref();
 
 
 onMounted(async () => {
+  firebaseUser.value = useAttrs().user;
+  authenticated.value = useAttrs().isAuthenticated;
   await loadContent();
   if (!authenticated) {
     navigateTo("/");
@@ -52,34 +51,20 @@ watch(firebaseUser, async () => {
 async function loadContent() {
   loading.value = true;
 
-  if (firebaseUser.value !== null) {
-    // console.log("User exists, Loading Data");
-
-    allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
-
-    allCourses.value = await queryEntireCollection('classes');
-
-    allProfessors.value = await queryEntireCollection('profs');
-
-    authenticated.value = true;
-  }
-  else {
+  if (!firebaseUser.value) {
     //console.log("No User, Clearing Data");
     authenticated.value = false;
+  }
+  else {
+    //console.log("User exists, fetch data");
+    allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
+    allCourses.value = await queryEntireCollection('classes');
+    allProfessors.value = await queryEntireCollection('profs');
   }
 
   loading.value = false;
 }
 
-// watch works directly on a ref
-watch(selected, async () => {
-  await navigateTo({
-    path: '/details/',
-    query: {
-      id: selected.value.id,
-    },
-    replace: true,
-  })
-})
+
 
 </script>
