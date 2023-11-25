@@ -11,6 +11,7 @@
         <v-card-title>{{ ratingDisplay(calculateAverage()) }}</v-card-title>
         <v-card-actions>
           <MakeReviewBtn :firebaseUser="firebaseUser" :reviewedObjectId="reviewedObjectId" />
+          <BookmarkBtn v-if="isCourse" :reviewedObjectId="reviewedObjectId" />
         </v-card-actions>
       </v-card>
 
@@ -34,6 +35,7 @@ const firebaseUser = useFirebaseUser();
 
 const currentObjectName = ref<null | string>(null);
 const specificPosts = ref<any[]>([]);
+var isCourse = false;
 
 const authenticated = ref(false);
 const loading = ref(true);
@@ -93,9 +95,11 @@ async function getObject(id: string) {
   const profDoc = await getDoc(profDocRef);
 
   if (courseDoc.exists()) {
+    isCourse = true;
     return courseDoc.data().title;
   }
   if (profDoc.exists()) {
+    isCourse = false;
     return profDoc.data().title;
   }
   else return id;

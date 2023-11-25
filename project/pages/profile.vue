@@ -64,6 +64,16 @@
 
       <v-window-item value="tab-1">
         <v-container fluid>
+          <v-container class="flex flex-col items-center justify-center">
+            <v-list>
+             <v-list-item v-for="bookmark in userBookmarks" :key="bookmark.id" @click="navigateToCourseProfile(bookmark.reviewedObjectId)">
+              <v-list-item-content>
+                <v-list-item-title>{{ bookmark.reviewedObjectName }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            </v-list>
+
+          </v-container>
 
         </v-container>
       </v-window-item>
@@ -88,6 +98,7 @@ const authenticated = ref();
 const userDoc = ref();
 const editedUserDoc = ref();
 const dialog = ref(false);
+const userBookmarks = ref([]); 
 
 const rules = ref({
   required: (value: any) => !!value || "Cannot be empty",
@@ -126,6 +137,10 @@ async function loadContent() {
       console.log('userId does not exist');
     }
 
+    // fetching user bookmarks for saved courses
+    userBookmarks.value = await queryCollectionByField("bookmarks", "userId", userId);
+    //console.log(userBookmarks.value)
+  
     authenticated.value = true;
   } else {
     authenticated.value = false;
@@ -198,6 +213,16 @@ const saveProfileChanges = async () => {
 };
 
 const { profilePicUrl, updatePicture } = inject('picture') as any;
+
+async function navigateToCourseProfile(reviewedObjectId) {
+  await navigateTo({
+    path: '/details/',
+    query: {
+      id: reviewedObjectId,
+    },
+    replace: true,
+  })
+};
 
 
 </script>
