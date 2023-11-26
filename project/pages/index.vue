@@ -4,13 +4,18 @@
       <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
     </div>
 
-    <v-container v-if="!authenticated && !loading">
-      <h1 class="text-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-        Welcome to Campus Critique!</h1>
+    <v-container v-if="!authenticated && !loading" class="flex flex-row">
+      <div class="flex items-center justify-between flex-wrap text-center">
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-700 dark:text-white w-full">
+          Welcome to Campus Critique!
+        </h1>
 
-      <v-btn color="primary-button" to="/register">
-        Join Us
-      </v-btn>
+        <v-btn class="bg-primary-button mt-4" to="/register">
+          Join Us
+        </v-btn>
+      </div>
+
+      <v-img class="ml-4 w-full sm:w-1/2 mt-4" src="../assets/illustration.svg"></v-img>
     </v-container>
 
     <v-container v-if="authenticated && !loading" class="flex-vertical justify-center">
