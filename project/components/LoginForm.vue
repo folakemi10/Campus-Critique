@@ -7,8 +7,9 @@
                         label="Email" variant="underlined" required></v-text-field>
 
                     <v-text-field :rules="[rules.required]" v-model="userLogin.password" color="primary" label="Password"
-                        placeholder="Enter your password" variant="underlined" required :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show ? 'text' : 'password'" @click:append="show = !show"></v-text-field>
+                        placeholder="Enter your password" variant="underlined" required
+                        :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" :type="show ? 'text' : 'password'"
+                        @click:append="show = !show"></v-text-field>
                 </v-container>
 
                 <v-divider></v-divider>
@@ -16,20 +17,25 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
 
-                    <v-btn color="success" type="submit" :loading="loading">
+                    <v-btn color="primary" type="submit" :loading="loading">
                         Log In
                         <v-icon icon="mdi-chevron-right" end></v-icon>
                     </v-btn>
 
                 </v-card-actions>
-                 <v-alert v-if="emailNotVerified" type="error" outlined>
+                <v-alert v-if="incorrectLogin" type="error" outlined>
+                    Email or password was incorrect.
+                </v-alert>
+                <v-alert v-if="emailNotVerified" type="error" outlined>
                     Email is not verified. Please verify your email and refresh the page.
                     <v-btn @click="sendVerificationEmail">Resend Verification Email</v-btn>
                 </v-alert>
             </v-form>
+            <v-card-actions>Don't have an account? &nbsp; <a href="/register" class="underline text-inherit"> Register
+                    here!</a></v-card-actions>
         </v-card>
 
-        <NuxtLink to="/register">Don't have an account? Register here!</NuxtLink>
+
     </v-container>
 </template>
 
@@ -38,21 +44,23 @@
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 
 const actionCodeSettings = {
-  // URL you want to redirect back to. The domain (www.example.com) for this
-  // URL must be in the authorized domains list in the Firebase Console.
-  url: 'campuscritique.vercel.app',
-  // This must be true.
-  handleCodeInApp: true,
-  iOS: {
-    bundleId: 'com.example.ios'
-  },
-  android: {
-    packageName: 'com.example.android',
-    installApp: true,
-    minimumVersion: '12'
-  },
-  dynamicLinkDomain: 'example.page.link'
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be in the authorized domains list in the Firebase Console.
+    url: 'campuscritique.vercel.app',
+    // This must be true.
+    handleCodeInApp: true,
+    iOS: {
+        bundleId: 'com.example.ios'
+    },
+    android: {
+        packageName: 'com.example.android',
+        installApp: true,
+        minimumVersion: '12'
+    },
+    dynamicLinkDomain: 'example.page.link'
 };
+
+const incorrectLogin = ref(false);
 
 const userLogin = ref({
     email: "",
@@ -86,9 +94,10 @@ async function onSubmit(event) {
             //sendEmailVerification(firebaseUser);
             console.log("Email is not verified. Please verify your email and refresh the page.");
         }
-        await navigateTo("/");
+        //await navigateTo("/");
     } else {
-        console.log(firebaseUser.value);
+        incorrectLogin.value = true;
+        //console.log(firebaseUser.value);
     }
 }
 
