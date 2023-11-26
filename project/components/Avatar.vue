@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-avatar color="black" :size="props.size || 'large'">
-            <img v-if="hasProfilePicture" :src="profilePicUrl" alt="your profile image">
+            <img v-if="profilePicUrl" :src="profilePicUrl" alt="your profile image">
             <span v-else class="text-h5">{{ getUserInitials() }}</span>
         </v-avatar>
     </div>
@@ -10,9 +10,7 @@
 
 <script setup lang="ts">
 
-const hasProfilePicture = ref(true);
-
-const {profilePicUrl, updatePicture} = inject('picture') as any;
+const { profilePicUrl, updatePicture } = inject('picture') as any;
 
 const props = defineProps({
     user: Object,
@@ -22,22 +20,16 @@ const props = defineProps({
 })
 
 onMounted(async () => {
-    await updatePicture();
-
-    if (profilePicUrl === '') {
-        hasProfilePicture.value = false;
-    }
+    await updatePicture(); 
 })
 
 function getUserInitials() {
-    if (profilePicUrl === null) {
-        if (props.user?.firstname == null || props.user?.firstname == null) {
-            return props.user?.email.charAt(0);
-        } else {
-            return props.user.firstname?.charAt(0) + props.user.lastname?.charAt(0);
-        }
+    console.log(props.user);
+    if (props.user?.firstname == null || props.user?.firstname == null) {
+        return props.user?.email.charAt(0);
+    } else {
+        return props.user.firstname?.charAt(0) + props.user.lastname?.charAt(0);
     }
-    return '';
 }
 
 

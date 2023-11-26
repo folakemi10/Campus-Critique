@@ -3,7 +3,7 @@
     <v-card class="min-w-full max-w-xl ">
       <v-card-text>
         <div class="flex items-center">
-          <Avatar class="mr-4" size="64" :user='userDoc' />
+          <Avatar class="mr-4" size="64" :user='userDoc' v-if="userDoc"/>
           <h1 class="text-3xl font-semibold"> {{ userDoc.firstname }} {{ userDoc.lastname }}</h1>
         </div>
 
@@ -22,7 +22,7 @@
 
             <v-card-text>
               <div class="flex items-center">
-                <Avatar class="mr-4" size="64" :user='userDoc' />
+                <Avatar class="mr-4" size="64" :user='userDoc' v-if="userDoc"/>
                 <ProfilePicBtn :uid_prop="userDoc.uid" @update-profile-pic='updatePicture' />
               </div>
               <v-text-field :rules="[rules.required]" v-model="editedUserDoc.username" label="Username"

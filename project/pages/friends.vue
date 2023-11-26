@@ -81,8 +81,9 @@ import { queryEntireCollection } from "~/lib/db";
 
 
 
-const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value?.uid;
+const firebaseUser = ref();
+const userId = ref();
+
 const usersRef = collection(db, "users");
 let userSuggestions = ref<any[]>([]);
 let allUsers = ref<any[]>([]);;
@@ -95,7 +96,12 @@ const snackbarText = ref();
 
 const authenticated = firebaseUser ? true : false;
 
-
+onMounted(async () => {
+  await loadContent();
+});
+watch(firebaseUser, async () => {
+  await loadContent();
+});
 
 //search bar for friends tab
 async function loadContent() {
@@ -109,10 +115,6 @@ async function loadContent() {
   }
 }
 
-
-watch(firebaseUser, async () => {
-  await loadContent();
-});
 
 watch(selected, () => {
   const selectedUserObject = allUsers.value.find(user => user.username === selected.value);
@@ -134,9 +136,6 @@ watch(friendObject, async () => {
 });
 
 
-onMounted(async () => {
-  await loadContent();
-});
 
 
 const q = query(usersRef, where("uid", "==", userId));

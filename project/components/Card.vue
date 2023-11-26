@@ -46,7 +46,7 @@
       <div>{{ review?.textReview }}</div>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions v-if="attachments.length > 0">
       <v-chip-group>
         <FileChip v-for="(attachment, index) in attachments" :key="index" :icon="`mdi-download`"
           :fileName="attachment.metadata.name" :downloadLink="attachment.link">
