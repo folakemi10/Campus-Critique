@@ -39,10 +39,10 @@
           <Snackbar v-if="snackbar" :text = "snackbarText"/>
           <h1 class="text-3xl font-semibold mb-4"> Your Invites </h1>
           <v-card v-for="invitation in invitations" :key="invitation.id" class="mb-4">
-            <v-card-title>{{ invitation.senderName }} is trying to become your friend</v-card-title>
+            <v-card-text>{{ invitation.senderName }} is trying to become your friend</v-card-text>
             <v-card-actions>
-              <v-btn @click="acceptInvitation(invitation)">Accept</v-btn>
-              <v-btn @click="declineInvitation(invitation)">Decline</v-btn>
+              <v-btn  text="Edit Profile" variant="outlined" @click="acceptInvitation(invitation)">Accept</v-btn>
+              <v-btn  text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">Decline</v-btn>
             </v-card-actions>
           </v-card>
 
@@ -56,9 +56,9 @@
           <Snackbar v-if="snackbar" :text = "snackbarText"/>
           <h1 class="text-3xl font-semibold mb-4"> Sent Invites </h1>
           <v-card v-for="invitation in sentInvitations" :key="invitation.id" class="mb-4">
-            <v-card-title> You sent an invite to {{ invitation.receiverName }} </v-card-title>
+            <v-card-text> You sent an invite to {{ invitation.receiverName }} </v-card-text>
             <v-card-actions>
-              <v-btn @click="declineInvitation(invitation)">withdraw</v-btn>
+              <v-btn  text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">withdraw</v-btn>
             </v-card-actions>
           </v-card>
 
@@ -77,12 +77,12 @@
 import { collection, updateDoc, deleteDoc, getDocs, query, where, doc, setDoc, getDoc, or } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { ref } from 'vue';
-import { queryEntireCollection } from "~/lib/db";
+import { queryEntireCollection, getUser } from "~/lib/db";
 
 
 
-const firebaseUser = useFirebaseUser();
-const userId = firebaseUser.value?.uid;
+const firebaseUser = ref();
+const userId = ref();
 const usersRef = collection(db, "users");
 let userSuggestions = ref<any[]>([]);
 let allUsers = ref<any[]>([]);;
@@ -93,31 +93,64 @@ const user = ref();
 const snackbar = ref(false);
 const snackbarText = ref();
 
-const authenticated = firebaseUser ? true : false;
+const authenticated = ref();
 
+onMounted(async () => {
+    firebaseUser.value = useAttrs().user;
+    authenticated.value = useAttrs().isAuthenticated;
+    await loadContent();
+    if (!authenticated) {
+        navigateTo("/");
+    }
+});
 
+watch(firebaseUser, async () => {
+    await loadContent();
+});
 
 //search bar for friends tab
 async function loadContent() {
   if (firebaseUser.value != null) {
+    userId.value = firebaseUser.value?.uid;
+    user.value = await getUser(userId.value);
     allUsers.value = await queryEntireCollection('users');
+    
+    //remove the user from the list
+    allUsers.value = allUsers.value.filter(user => user.uid !== userId.value);
+
     userSuggestions.value = allUsers.value.map(user => user.username);
-    //authenticated.value = true;
+    
+    const invitationsQuery1 = query(
+      invitationsRef,
+      where('receiverId', '==', userId.value),
+      where('status', '==', 'pending')
+    );
+    const invitationsQuerySnapshot1 = await getDocs(invitationsQuery1);
+    invitations.value = invitationsQuerySnapshot1.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Retrieve pending invitations where the user is the sender
+    const invitationsQuery2 = query(
+      invitationsRef,
+      where('senderId', '==', userId.value),
+      where('status', '==', 'pending')
+    );
+    const invitationsQuerySnapshot2 = await getDocs(invitationsQuery2);
+    sentInvitations.value = invitationsQuerySnapshot2.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
   }
   else {
     console.log("No User");
   }
 }
 
-
-watch(firebaseUser, async () => {
-  await loadContent();
-});
-
 watch(selected, () => {
   const selectedUserObject = allUsers.value.find(user => user.username === selected.value);
   friendObject.value = selectedUserObject;
-  //console.log("pop" + friendObject.value);
 });
 
 watch(friendObject, async () => {
@@ -136,13 +169,7 @@ watch(friendObject, async () => {
 
 onMounted(async () => {
   await loadContent();
-});
-
-
-const q = query(usersRef, where("uid", "==", userId));
-const querySnapshot = await getDocs(q);
-querySnapshot.forEach((doc) => {
-  user.value = doc.data();
+  await combineFriends();
 });
 
 
@@ -157,63 +184,21 @@ const tabItems = [
 const userDataMap: { [key: string]: string } = {};
 
 const invitationsRef = collection(db, 'friends');
-
-
-// Create an invitations array to store received invitations
 const invitations = ref<any[]>([]);
-
-// Create an invitations array to store sent invitations
 const sentInvitations = ref<any[]>([]);
-
-// Populate the invitations array
-onMounted(async () => {
-  if (userId) {
-    // Retrieve pending invitations where the user is the receiver
-    const invitationsQuery = query(
-      invitationsRef,
-      where('receiverId', '==', userId),
-      where('status', '==', 'pending')
-    );
-    const invitationsQuerySnapshot = await getDocs(invitationsQuery);
-    invitations.value = invitationsQuerySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-  }
-});
-
-
-onMounted(async () => {
-  if (userId) {
-    // Retrieve pending invitations where the user is the sender
-    const invitationsQuery = query(
-      invitationsRef,
-      where('senderId', '==', userId),
-      where('status', '==', 'pending')
-    );
-    const invitationsQuerySnapshot = await getDocs(invitationsQuery);
-    sentInvitations.value = invitationsQuerySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-  }
-});
-
 
 
 // Populate the invitations array and display accepted friends
 const combineFriends = async () => {
   if (userId) {
-    // Fetch both sent and received friend invitations
-    const sentInvitationsQuery = query(invitationsRef, where('senderId', '==', userId));
-    const receivedInvitationsQuery = query(invitationsRef, where('receiverId', '==', userId));
+    const sentInvitationsQuery = query(invitationsRef, where('senderId', '==', userId.value));
+    const receivedInvitationsQuery = query(invitationsRef, where('receiverId', '==', userId.value));
 
     const [sentInvitationsSnapshot, receivedInvitationsSnapshot] = await Promise.all([
       getDocs(sentInvitationsQuery),
       getDocs(receivedInvitationsQuery),
     ]);
 
-    // Create arrays of sender and receiver IDs of friends for accepted invitations
     const sentFriendIds = sentInvitationsSnapshot.docs
       .filter((doc) => doc.data().status === 'accepted')
       .map((doc) => doc.data().receiverId);
@@ -222,10 +207,8 @@ const combineFriends = async () => {
       .filter((doc) => doc.data().status === 'accepted')
       .map((doc) => doc.data().senderId);
 
-    // Combine sender and receiver IDs into one array
     const allFriendIds = [...sentFriendIds, ...receivedFriendIds];
 
-    // Use the IDs to fetch the usernames from the users collection
     const q = query(usersRef);
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
@@ -239,27 +222,19 @@ const combineFriends = async () => {
   }
 
 };
-// Display accepted friends when the component is mounted
-onMounted(async () => {
-  // Populate the invitations array and display accepted friends
-  await combineFriends();
-});
 
 // Accept an invitation and update the friends list
 async function acceptInvitation(invitation: any) {
   try {
-    // Update the status of the invitation to 'accepted'
+    
     const invitationDoc = doc(invitationsRef, invitation.id);
     await updateDoc(invitationDoc, { status: 'accepted' });
 
-    //make snackbar visible
     snackbarText.value = "Invite accepted";
     snackbar.value = true;
 
-    // Call combineFriends to update the friends list with the newly accepted friend
     await combineFriends();
 
-    // Remove the accepted invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
 
   } catch (error) {
@@ -269,17 +244,11 @@ async function acceptInvitation(invitation: any) {
 
 async function declineInvitation(invitation: any) {
   try {
-    // Delete the invitation document from the collection
     const invitationDoc = doc(invitationsRef, invitation.id);
     await deleteDoc(invitationDoc);
-
-
-
-    //make snackbar visible
     snackbarText.value = "Invite deleted";
     snackbar.value = true;
 
-    // Remove the declined invitation from the array
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
 
     sentInvitations.value = sentInvitations.value = sentInvitations.value.filter((item) => item.id !== invitation.id);
