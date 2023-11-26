@@ -65,13 +65,15 @@
       <v-window-item value="tab-1">
         <v-container fluid>
           <v-container class="flex flex-col items-center justify-center">
-            <v-list>
-             <v-list-item v-for="bookmark in userBookmarks" :key="bookmark.id" @click="navigateToCourseProfile(bookmark.reviewedObjectId)">
-              <v-list-item-content>
-                <v-list-item-title>{{ bookmark.reviewedObjectName }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            </v-list>
+            
+
+              <v-card class="my-10 min-w-full max-w-xl">
+                <v-card-item v-for="bookmark in userBookmarks" :key="bookmark.id" @click="navigateToCourseProfile(bookmark.reviewedObjectId)">
+                  <v-card-title>
+                    {{ bookmark.reviewedObjectName }}
+                  </v-card-title>
+                </v-card-item>
+              </v-card>
 
           </v-container>
 
@@ -140,9 +142,8 @@ async function loadContent() {
     }
 
     // fetching user bookmarks for saved courses
-    const bookmarks = await queryCollectionByField("bookmarks", "userId", userId);
-    
-    userBookmarks.value = bookmarks.map((obj)=> {return Object.assign({}, obj)});
+    const bookmarks = await queryCollectionByField('bookmarks', 'userId', userId.value);
+    userBookmarks.value = bookmarks.map((obj) => ({ ...obj }));
 
     //console.log(userBookmarks.value)
   
