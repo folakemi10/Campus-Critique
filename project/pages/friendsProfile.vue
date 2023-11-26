@@ -49,6 +49,7 @@ import { doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase
 import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 import { getProfilePic } from '~/lib/storage';
+import { sendFriendRequest } from '~/lib/friends';
 
 
 
@@ -132,55 +133,20 @@ async function loadContent() {
     loading.value = false;
 }
 
+async function inviteFriend() {
+    const send_uid = userId.value as string;
+    const recv_uid = friendId as string;
 
-
-//invite friend if selected user
-const inviteFriend = async () => {
-    try {
-        // Check if the userId is not null. this shouldn't happen but wouldn't let the code run otherwise
-        if (!firebaseUser.value?.uid) {
-            console.error('User is not authenticated. Unable to send an invitation.');
-            return;
-        }
-
-
-        if (friendName.value) {
-            const friendData = friendName.value;
-
-            // Create a unique invitation document ID based on invitationDocId
-            const invitationDocId =
-                userId < friendData.uid
-                    ? `${userId}_${friendData.uid}`
-                    : `${friendData.uid}_${userId}`;
-
-            const invitationDoc = doc(invitationsRef, invitationDocId);
-            const invitationDocSnapshot = await getDoc(invitationDoc);
-
-            if (!invitationDocSnapshot.exists()) {
-                await setDoc(invitationDoc, {
-                    senderId: userId,
-                    receiverId: friendData.uid,
-                    senderName: userName.value.username,
-                    receiverName: friendName.value.username,
-                    status: 'pending'
-                });
-
-                //make snackbar visible
-                snackbarText.value = "Invite Sent"
-                snackbar.value = true;
-
-            } else {
-
-                //make snackbar visible
-                snackbarText.value = "An invitation for this friend already eyxists"
-                snackbar.value = true;
-                console.log('An invitation for this friend already eyxists.');
-            }
-        }
-    } catch (error) {
-        console.error('Error inviting friend:', error);
+    const result = await sendFriendRequest(send_uid, recv_uid);
+    if (result == 0) {
+        snackbarText.value = "Invitation sent!";
+        snackbar.value = true;
     }
-};
+    if (result == 3) {
+        snackbarText.value = "An invitation for this friend already exists";
+        snackbar.value = true;
+    }
+}
 
 async function getFriendProfilePic() {
     return await getProfilePic(friendId);

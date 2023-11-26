@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { queryEntireCollection, queryOrderedCollection } from "~/lib/db";
+import { getFriendPosts } from "~/lib/friends";
 
 // data
 const firebaseUser: any | null = ref(null);
@@ -62,7 +63,8 @@ async function loadContent() {
   }
   else {
     //console.log("User exists, fetch data");
-    allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
+    // allPosts.value = await queryOrderedCollection('posts', 'modifiedAt', 'desc');
+    allPosts.value = await getFriendPosts(firebaseUser.value.uid);
     allCourses.value = await queryEntireCollection('classes');
     allProfessors.value = await queryEntireCollection('profs');
   }
