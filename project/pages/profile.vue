@@ -130,6 +130,8 @@ async function loadContent() {
   if (firebaseUser.value != null) {
     userId.value = firebaseUser.value?.uid;
     userDoc.value = firebaseUser.value;
+  
+    editedUserDoc.value = {...userDoc.value};
 
     if (userId.value) {
       allPosts.value = await queryCollectionByField("posts", "uid", userId.value);

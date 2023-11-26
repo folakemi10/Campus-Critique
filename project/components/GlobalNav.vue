@@ -1,7 +1,7 @@
 <template>
     <v-card color="grey-lighten-4" flat rounded="0">
         <v-toolbar>
-            <v-btn to="/" variant="plain"  :ripple="false">
+            <v-btn to="/" variant="plain" :ripple="false">
                 <v-toolbar-title>
                     <v-icon icon="mdi-message-draw"></v-icon>
                     Campus Critique
@@ -10,19 +10,18 @@
 
             <v-spacer></v-spacer>
             <!-- <MakeReviewBtn v-if="props.isAuthenticated" :firebaseUser="firebaseUser" :isGeneral="`true`"/> -->
-            <AvatarMenu v-if="props.isAuthenticated" :user="user"/>
 
-            <div v-if="isAdmin">
-                <AdminBtn :button-text="'Admin'" :size="'large'" />
+
+            <AvatarMenu v-if="props.isAuthenticated" :user="user" />
+
+
+            <AdminBtn :button-text="'Admin'" :size="'large'" v-if="isAdmin" />
+
+
+            <div class="pa-4 d-flex align-center">
+                <LoginBtn :button-text="'Login'" :size="'large'" v-if="!props.isAuthenticated" class="me-2"/>
+                <RegisterBtn :button-text="'Join'" :size="'large'" v-if="!props.isAuthenticated" />
             </div>
-
-
-            <div v-if="!props.isAuthenticated">
-                <LoginBtn :button-text="'Login'" :size="'large'" />
-                <RegisterBtn :button-text="'Join'" :size="'large'" />
-            </div>
-
-
         </v-toolbar>
     </v-card>
 </template>
