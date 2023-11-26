@@ -134,7 +134,10 @@ async function loadContent() {
     }
 
     // fetching user bookmarks for saved courses
-    userBookmarks.value = await queryCollectionByField("bookmarks", "userId", userId);
+    const bookmarks = await queryCollectionByField("bookmarks", "userId", userId);
+    
+    userBookmarks.value = bookmarks.map((obj)=> {return Object.assign({}, obj)});
+
     //console.log(userBookmarks.value)
   
     authenticated.value = true;
