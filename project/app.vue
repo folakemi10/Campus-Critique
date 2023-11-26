@@ -1,6 +1,6 @@
 <template>
     <div>
-        <GlobalNav :isAuthenticated='isAuthenticated' />
+        <GlobalNav :user="user" :isAuthenticated='isAuthenticated' />
         <NuxtLayout>
             <NuxtPage :key="key" :user="user" :isAuthenticated='isAuthenticated' />
         </NuxtLayout>
@@ -79,14 +79,14 @@ async function checkAdmin() {
 
 }
 
-const profilePicUrl = ref('');
+const profilePicUrl = ref();
 
 const updatePicture = async () => {
     if (firebaseUser.value !== null) {
         profilePicUrl.value = await getProfilePic(firebaseUser.value.uid);
     } else {
         // Handle the case where firebaseUser.value is null
-        profilePicUrl.value = '';
+        profilePicUrl.value = null;
     }
 };
 
