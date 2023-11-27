@@ -44,8 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { queryCollectionByField, del, getUser } from '~/lib/db';
-import { doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { queryCollectionByField, getUser } from '~/lib/db';
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 import { getProfilePic } from '~/lib/storage';
@@ -59,7 +59,6 @@ const userDoc = ref();
 
 let friendId = "";
 const friendPosts = ref();
-const userName = ref();
 const friendName = ref();
 const route = useRoute();
 const snackbar = ref(false);
@@ -79,7 +78,7 @@ const props = defineProps({
 //need to conditionaly render page
 const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
 const isFromAcceptedPage = route.query.fromFriendsPage === 'fromAcceptedPage';
-const invitationsRef = collection(db, 'friends');
+// const invitationsRef = collection(db, 'friends');
 
 //Control the sections of the profile page
 const tab = ref('tab-0');
