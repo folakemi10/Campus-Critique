@@ -223,7 +223,7 @@ async function onSubmit() {
 
     //if valid is true (meaning all the required questions of the form were filled out)
     if (valid.value) {
-        console.log(review.value);
+        //console.log(review.value);
         try {
             //add the post to the posts collection and return the document id
             const docId = await addPost();
