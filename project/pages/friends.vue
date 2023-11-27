@@ -83,6 +83,7 @@ import { queryEntireCollection, getUser } from "~/lib/db";
 
 const firebaseUser = ref();
 const userId = ref();
+
 const usersRef = collection(db, "users");
 let userSuggestions = ref<any[]>([]);
 let allUsers = ref<any[]>([]);;
@@ -105,7 +106,7 @@ onMounted(async () => {
 });
 
 watch(firebaseUser, async () => {
-    await loadContent();
+  await loadContent();
 });
 
 //search bar for friends tab
@@ -147,6 +148,7 @@ async function loadContent() {
     console.log("No User");
   }
 }
+
 
 watch(selected, () => {
   const selectedUserObject = allUsers.value.find(user => user.username === selected.value);

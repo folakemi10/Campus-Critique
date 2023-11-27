@@ -19,7 +19,6 @@
             item-text="firstname" item-value="id" return-object></v-autocomplete>
         </v-card>
 
-
         <v-card class="m-6" v-if="reviewedObject == 'professor'">
           <v-card-title>Which course did you take with this professor? </v-card-title>
           <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
@@ -171,7 +170,7 @@ watch(selectedProf, async () => {
 
 const review = ref({
   uid: userId,
-  reviewedObject: reviewedObject.value,
+  reviewedObject: '',
   class: '',
   professor: '',
   rating: 0,
@@ -187,7 +186,7 @@ const rules = ref({
 
 
 async function getObject(id: string) {
- // console.log("getting object");
+  // console.log("getting object");
   const courseDocRef = doc(db, 'classes', id);
   const profDocRef = doc(db, 'profs', id);
 
@@ -198,11 +197,12 @@ async function getObject(id: string) {
 
   if (courseDoc.exists()) {
     reviewedObject.value = "course";
-    
+    review.value.reviewedObject = reviewedObject.value;
     return courseDoc.data().title;
   }
   if (profDoc.exists()) {
     reviewedObject.value = "professor";
+    review.value.reviewedObject = reviewedObject.value;
     return profDoc.data().title;
   }
   else return id;

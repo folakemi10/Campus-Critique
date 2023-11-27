@@ -9,17 +9,15 @@
             </v-btn>
 
             <v-spacer></v-spacer>
-            <!-- <MakeReviewBtn v-if="props.isAuthenticated" :firebaseUser="firebaseUser" :isGeneral="`true`"/> -->
+            <div class="pa-4 d-flex align-center">
+                <AdminBtn :button-text="'Admin'" :size="'large'" v-if="isAdmin" class="me-2" />
+                <MakeReviewBtn v-if="props.isAuthenticated" :firebaseUser="firebaseUser" :isGeneral="`true`" class="me-2" />
+                <AvatarMenu v-if="props.isAuthenticated" :user="user" />
 
-
-            <AvatarMenu v-if="props.isAuthenticated" :user="user" />
-
-
-            <AdminBtn :button-text="'Admin'" :size="'large'" v-if="isAdmin" />
-
+            </div>
 
             <div class="pa-4 d-flex align-center">
-                <LoginBtn :button-text="'Login'" :size="'large'" v-if="!props.isAuthenticated" class="me-2"/>
+                <LoginBtn :button-text="'Login'" :size="'large'" v-if="!props.isAuthenticated" class="me-2" />
                 <RegisterBtn :button-text="'Join'" :size="'large'" v-if="!props.isAuthenticated" />
             </div>
         </v-toolbar>
@@ -47,6 +45,7 @@ onMounted(() => {
 });
 
 watch(firebaseUser, (newVal, oldVal) => {
+    checkAdmin();
     if (newVal) {
         checkAdmin();
     }
@@ -65,14 +64,15 @@ async function checkAdmin() {
     }
 
     user.value = docSnap.data();
-    //console.log(user);
+
+    //console.log(user.value);
     if (user.value.admin) {
         isAdmin.value = true;
     }
     else {
         isAdmin.value = false;
     }
-    ;
+
 }
 
 </script>
