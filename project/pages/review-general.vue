@@ -57,12 +57,12 @@
 
                 <v-card-actions>
                     <v-file-input v-model="selectedFiles" color="primary" label="Upload Files"
-                        placeholder="Select your files" prepend-icon="mdi-paperclip" variant="outlined" multiple clearable>
+                        placeholder="Select your files" prepend-icon="mdi-paperclip" variant="outlined" @change="addFiles" multiple clearable>
                     </v-file-input>
 
-                    <v-btn @click="addFiles">
+                    <!-- <v-btn @click="addFiles">
                         Add Files
-                    </v-btn>
+                    </v-btn> -->
                 </v-card-actions>
                 <v-card-item>
                     <v-chip-group>

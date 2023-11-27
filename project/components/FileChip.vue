@@ -1,5 +1,5 @@
 <template>
-    <v-chip :append-icon="props.icon" :href="props.downloadLink">
+    <v-chip :append-icon="props.icon" :href="props.downloadLink" target="_blank">
         {{ props.fileName.length < 24 ? props.fileName : props.fileName.substring(0,24) }} <!-- <a class="hidden">{{ props.downloadLink ?
             props.downloadLink : "Unamed File" }}</a> -->
     </v-chip>

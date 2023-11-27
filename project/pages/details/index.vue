@@ -29,6 +29,7 @@ import { average, doc, getDoc } from "firebase/firestore";
 import { ref, onMounted, computed, watch } from 'vue';
 import { db } from '~/lib/firebase';
 import { queryCollectionByField } from '~/lib/db';
+import { getFriendPosts } from "~/lib/friends";
 
 const reviewedObjectId = String(useRoute().query.id);
 const firebaseUser = useFirebaseUser();
@@ -62,11 +63,14 @@ async function loadContent() {
     const courseDoc = await getDoc(courseDocRef);
     const profDoc = await getDoc(profDocRef);
 
+    const uid = firebaseUser.value.uid as string;
     if (courseDoc.exists()) {
-      specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
+      // specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
+      specificPosts.value = await getFriendPosts(uid, 'class', reviewedObjectId);
     }
     if (profDoc.exists()) {
-      specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
+      // specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
+      specificPosts.value = await getFriendPosts(uid, 'professor', reviewedObjectId);
     }
 
     currentObjectName.value = await getObject(reviewedObjectId);
