@@ -106,7 +106,7 @@ onUpdated(async () => {
     attachments.value = await getAttachments(props.review.id);
   }
 
-  console.log(props.review);
+  //console.log(props.review);
 
 });
 
