@@ -72,6 +72,20 @@ export async function declineFriendRequest(inv_id: string) {
     await deleteDoc(invDoc);
 }
 
+export async function unFriend(send_uid: string, recv_uid: string,) {
+    const inv_id = send_uid < recv_uid ?
+        `${send_uid}_${recv_uid}` :
+        `${recv_uid}_${send_uid}`;
+    const invDoc = doc(db, 'friends', inv_id);
+    const invSnap = await getDoc(invDoc);
+    if (invSnap.exists()) {    
+       await deleteDoc(invDoc);
+       console.log("unfriend succesful");
+       return 0;
+    }
+    return 3;
+}
+
 /**
  * Gets a list of friend UIDs of a user
  * @param uid UID of user to get friends of 
