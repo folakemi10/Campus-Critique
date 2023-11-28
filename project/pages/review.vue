@@ -138,11 +138,20 @@ async function loadContent() {
     allCourses.value = await queryEntireCollection('classes');
 
     const professorsRef = await queryEntireCollection('profs');
+    
+    const addedProfessorIds = new Set(); 
+    
     professorsRef.forEach((doc: any) => {
       const title = doc.firstname + " " + doc.lastname;
       doc = { ...doc, title };
+      console.log(doc);
 
-      allProfessors.value.push(doc);
+      // Check if the professor ID is not already added 
+      if ((!addedProfessorIds.has(doc.id)) && (allProfessors.value.length < professorsRef.length))  {
+        allProfessors.value.push(doc);
+        addedProfessorIds.add(doc.id);
+        console.log(doc.id);
+      }
     });
 
     reviewedObjectName.value = await getObject(reviewedObjectId);
