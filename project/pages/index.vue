@@ -5,8 +5,8 @@
     </div>
 
     <v-container v-if="!authenticated && !loading" >
-      <v-row>
-        <v-col class="flex items-center justify-between flex-wrap content-center">
+      <v-row class="flex flex-col items-center md:flex-row items-start">
+        <v-col class="flex flex-col items-center justify-between flex-wrap md:items-start">
           <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-700 dark:text-white w-full">
             Welcome to Campus Critique!
           </h1>
@@ -19,34 +19,34 @@
           </v-btn>
         </v-col>
 
-        <v-col>
-          <v-img src="../assets/illustration.svg"></v-img>
+        <v-col >
+          <v-img src="../assets/illustration.svg" class="max-w-sm md:w-full"></v-img>
         </v-col>
       </v-row>
       <v-row>
         <div class="flex flex-col  text-center space-x-2 > * + * md:flex-row space-y-2 > * + * ">
-          <v-card variant="outlined">
+          <v-card variant="flat">
             <v-card-text>
               📚 Rate Courses: Dive into a world of unbiased course reviews. Your fellow students have spoken, helping you
               choose the classes that align with your academic goals.
             </v-card-text>
           </v-card>
 
-          <v-card variant="outlined">
+          <v-card variant="flat">
             <v-card-text>
               👨‍🏫 Evaluate Professors: Get the inside scoop on professors. From teaching styles to accessibility, make
               informed decisions that set you up for success.
             </v-card-text>
           </v-card>
 
-          <v-card variant="outlined">
+          <v-card variant="flat">
             <v-card-text>
               📤 Share with Friends: Build a network of academic enthusiasts! Share your favorite courses, top-rated
               professors, and valuable study materials with friends who share your passion for learning.
             </v-card-text>
           </v-card>
 
-          <v-card variant="outlined">
+          <v-card variant="flat">
             <v-card-text>
               📑 Access Course Materials: Say goodbye to the struggle of finding quality study resources. Explore a
               treasure

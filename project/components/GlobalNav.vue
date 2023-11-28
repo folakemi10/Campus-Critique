@@ -4,16 +4,15 @@
             <v-btn to="/" variant="plain" :ripple="false">
                 <v-toolbar-title>
                     <v-icon icon="mdi-message-draw"></v-icon>
-                    Campus Critique
+                    <div class="hidden sm:inline ml-2">Campus Critique</div>
                 </v-toolbar-title>
             </v-btn>
 
             <v-spacer></v-spacer>
             <div class="pa-4 d-flex align-center">
-                <AdminBtn :button-text="'Admin'" :size="'large'" v-if="isAdmin" class="me-2" />
+                <AdminBtn :button-text="'Admin'" :size="'large'" v-if="isAuthenticated && isAdmin" class="me-2" />
                 <MakeReviewBtn v-if="props.isAuthenticated" :firebaseUser="firebaseUser" :isGeneral="`true`" class="me-2" />
                 <AvatarMenu v-if="props.isAuthenticated" :user="user" />
-
             </div>
 
             <div class="pa-4 d-flex align-center">
@@ -50,6 +49,10 @@ watch(firebaseUser, (newVal, oldVal) => {
         checkAdmin();
     }
 });
+
+onUpdated(async ()=>{
+    checkAdmin();
+})
 
 async function checkAdmin() {
     if (!firebaseUser.value) {
