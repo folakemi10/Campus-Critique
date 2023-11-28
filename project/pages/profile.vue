@@ -50,11 +50,9 @@
 
     <v-window v-model="tab" class="bg-black">
       <v-window-item value="tab-0">
-        <v-container class="flex flex-col items-center justify-center">
-
+        <v-container class="flex flex-col items-center justify-center" v-if="allPosts">
           <Card v-for="(review, index) in allPosts" :key="review.id" :review="review" :showChangeBtns="true"
             @open-edit-modal="openEditModalForReview" :deletePost="deletePost"></Card>
-
         </v-container>
 
         <EditPostModal v-model="isActive" :active="isActive" :reviewToEdit="reviewToEdit"
@@ -84,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { queryCollectionByField, del, getUser } from '~/lib/db';
+import { queryCollectionByField, del, getUser, queryOrderedCollection } from '~/lib/db';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { addDoc } from "firebase/firestore";
@@ -136,7 +134,7 @@ async function loadContent() {
     editedUserDoc.value = {...userDoc.value};
 
     if (userId.value) {
-      allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
+      allPosts.value = await queryOrderedCollection("posts", "modifiedAt", "desc", userId.value);
     } else {
       console.log('userId does not exist');
     }
@@ -170,7 +168,7 @@ async function deletePost(id: string) {
     //delete files associated with post in storage
     await deleteFiles(id);
     //refresh posts
-    allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
+    allPosts.value = await queryOrderedCollection("posts", "modifiedAt", "desc", userId.value);
 
   } catch (e) {
     console.log(e);
@@ -186,8 +184,8 @@ const openEditModalForReview = (review: any) => {
 };
 
 const closeEditModal = async (editedReview: any) => {
-  console.log("refreshing after close");
-  allPosts.value = await queryCollectionByField("posts", "uid", userId.value);
+  //console.log("refreshing after close");
+  allPosts.value = await queryOrderedCollection("posts", "modifiedAt", "desc", userId.value);
   isActive.value = false;
 };
 

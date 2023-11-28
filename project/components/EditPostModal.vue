@@ -6,7 +6,7 @@
                 <v-card-subtitle>
                     Adjust Your Rating:
                 </v-card-subtitle>
-                <v-rating :model-value="editedReview.rating" color="amber" density="compact"></v-rating>
+                <v-rating v-model="editedReviewRating" color="amber" density="compact"></v-rating>
 
                 <v-card-subtitle>
                     Adjust Your Review:
@@ -16,12 +16,12 @@
             </v-card-item>
             <v-card-actions class="flex-row justify-space-between align-center">
                 <v-file-input v-model="selectedFiles" color="primary" label="Upload Files" placeholder="Select your files"
-                    prepend-icon="mdi-paperclip" variant="outlined" multiple clearable>
+                    prepend-icon="mdi-paperclip" variant="outlined" multiple clearable @change="addFiles">
                 </v-file-input>
 
-                <v-btn color="primary" @click="addFiles">
+                <!-- <v-btn color="primary" @click="addFiles">
                     Add Files
-                </v-btn>
+                </v-btn> -->
             </v-card-actions>
 
             <v-card-item>
@@ -60,6 +60,7 @@ const props = defineProps({
 
 const emit = defineEmits();
 const editedReview = ref();
+const editedReviewRating = ref()
 
 const allFiles: any = ref([]);
 const selectedFiles: Ref<File[]> = ref([]);
@@ -77,10 +78,15 @@ async function getAttachments(reviewId: any) {
     concatenatedFiles.value = [...allFiles.value];
 }
 
+
 onUpdated(async () => {
     editedReview.value = {
         ...props.reviewToEdit
     };
+
+    editedReviewRating.value = props.reviewToEdit?.rating;
+
+   // console.log(editedReview.value);
 
     getAttachments(props.reviewToEdit?.id);
 
@@ -116,10 +122,11 @@ import { db } from '~/lib/firebase';
 import { deleteFiles, getFiles, uploadFiles } from "~/lib/storage";
 
 async function updateDocument() {
+   // console.log(editedReviewRating.value);
     try {
         const docRef = doc(db, "posts", props.reviewToEdit?.id);
         await updateDoc(docRef, {
-            rating: editedReview.value.rating,
+            rating: editedReviewRating.value,
             textReview: editedReview.value.textReview,
             modifiedAt: serverTimestamp()
         });
@@ -136,7 +143,7 @@ function addFiles() {
 
 
     filesToAdd.value.push(...selectedFiles.value);
-    console.log(filesToAdd.value);
+    //console.log(filesToAdd.value);
 
     //reset the currently selected files
     selectedFiles.value = [];
@@ -149,7 +156,7 @@ async function removeFile(index: any) {
     let fileName = concatenatedFiles.value[index].name ? concatenatedFiles.value[index].name : concatenatedFiles.value[index].metadata.name;
 
     filesToRemove.value.push(fileName);
-    console.log(filesToRemove.value);
+    //console.log(filesToRemove.value);
     concatenatedFiles.value.splice(index, 1);
     //await deleteFiles(props.reviewToEdit?.id, allFiles.value[index]);
 }

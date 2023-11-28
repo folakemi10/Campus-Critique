@@ -4,7 +4,7 @@
       <v-row align-items="start">
         <v-col cols="auto">
           <!-- User who made the post -->
-          <v-card-subtitle> {{ username }} &#183; {{ review?.modifiedAt ? formatDate(review?.modifiedAt) : "No date" }}
+          <v-card-subtitle> {{ username }} &#183; {{ review?.modifiedAt ? formatDate(review?.modifiedAt) : (review?.createdAt ? formatDate(review?.createdAt) : "No date") }}
           </v-card-subtitle>
         </v-col>
 
@@ -97,6 +97,7 @@ onMounted(async () => {
   course.value = await getCourse(props.review?.class, props.review?.reviewedObject);
   prof.value = await getProf(props.review?.professor, props.review?.reviewedObject);
   attachments.value = await getFiles(props.review?.id);
+  
 })
 
 
@@ -104,6 +105,8 @@ onUpdated(async () => {
   if (props.review) {
     attachments.value = await getAttachments(props.review.id);
   }
+
+  console.log(props.review);
 
 });
 

@@ -36,11 +36,8 @@
                 </v-card>
 
 
-
-
-
                 <v-card class="m-6">
-                    <v-rating hover v-model="review.rating"></v-rating>
+                    <v-rating hover v-model="review.rating" :rules="rules.required"></v-rating>
                 </v-card>
 
 
@@ -48,7 +45,7 @@
                     <v-card-title>Write a Review: </v-card-title>
                     <v-container fluid>
                         <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow
-                            v-model="review.textReview"></v-textarea>
+                            v-model="review.textReview" :rules="rules.required"></v-textarea>
                     </v-container>
                 </v-card>
 
@@ -63,8 +60,8 @@
                         </v-file-input>
 
                         <!-- <v-btn @click="addFiles">
-                        Add Files
-                    </v-btn> -->
+                            Add Files
+                        </v-btn> -->
                     </v-card-actions>
                     <v-card-item>
                         <v-chip-group>
