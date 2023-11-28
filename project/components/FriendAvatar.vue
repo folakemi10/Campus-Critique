@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-avatar color="black" :size="props.size || 'large'">
-            <img v-if="hasProfilePicture" :src="profilePicUrl" alt="your profile image">
+            <img v-if="profilePicUrl" :src="profilePicUrl" alt="Profile Image">
             <span v-else class="text-h5">{{ getUserInitials() }}</span>
         </v-avatar>
     </div>
@@ -13,31 +13,32 @@ import { getProfilePic } from '~/lib/storage';
 
 
 const hasProfilePicture = ref(false);
+//const { profilePicUrl, updatePicture } = inject('picture') as any;
+const profilePicUrl = ref();
 
 const props = defineProps({
     user: Object,
     size: String,
 })
 
-const profilePicUrl = ref();
+//const profilePicUrl = ref();
 
 onMounted(async () => {
-    try {
-        if (props.user !== undefined) {
-            const picUrl = await getProfilePic(props.user.uid);
-            if (picUrl === "") {
-                hasProfilePicture.value = false;
-            } else {
-                hasProfilePicture.value = true;
-            }
+    //await updatePicture();
+    if (props.user !== undefined) {
+        profilePicUrl.value = await getProfilePic(props.user.uid);
+        if (profilePicUrl.value === "") {
+            hasProfilePicture.value = false;
+        } else {
+            hasProfilePicture.value = true;
         }
-    }
-    catch (e) {
+    } else {
         hasProfilePicture.value = false;
     }
+}
 
-   // console.log(hasProfilePicture.value);
-})
+    // console.log(hasProfilePicture.value);
+)
 
 function getUserInitials() {
     if (!hasProfilePicture.value) {
