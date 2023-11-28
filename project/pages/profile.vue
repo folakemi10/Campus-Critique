@@ -127,6 +127,7 @@ interface Post {
 const allPosts = ref<Post[]>([]);
 
 async function loadContent() {
+  console.log("loading content");
   if (firebaseUser.value != null) {
     userId.value = firebaseUser.value?.uid;
     userDoc.value = firebaseUser.value;
