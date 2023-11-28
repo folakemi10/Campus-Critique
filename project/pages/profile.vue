@@ -1,10 +1,9 @@
 <template>
   <div>
-
-
     <div class="text-center" v-if="loading">
       <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
     </div>
+    
     <v-card v-if="authenticated && !loading">
       <v-card class="min-w-full max-w-xl ">
         <v-card-text>
