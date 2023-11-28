@@ -18,7 +18,7 @@
             </v-card-text>
                 <v-btn v-if="isFromFriendsPage" :variant="variant" class="mx-4 mb-4" @click="inviteFriend">Invite
                     Friend</v-btn>
-                <v-btn v-if="!isFromFriendsPage" :variant="variant" class="mx-4 mb-4" @click="unFriendUser"> Remove
+                <v-btn v-if="isFromAcceptedPage" :variant="variant" class="mx-4 mb-4" @click="unFriendUser"> Remove
                     Friend</v-btn>
             </v-card>
 
@@ -80,8 +80,8 @@ const props = defineProps({
 });
 
 //need to conditionaly render page
-const isFromFriendsPage = route.query.fromFriendsPage === 'fromFriendsPage';
-const isFromAcceptedPage = route.query.fromFriendsPage === 'fromAcceptedPage';
+const isFromFriendsPage = route.query.friendRequestStatus === 'pending';
+const isFromAcceptedPage = route.query.friendRequestStatus ==='accepted';
 // const invitationsRef = collection(db, 'friends');
 
 //Control the sections of the profile page
@@ -154,8 +154,6 @@ async function inviteFriend() {
 async function unFriendUser() {
     const send_uid = userId.value as string;
     const recv_uid = friendId as string;
-
-
     const result = await unFriend(send_uid, recv_uid);
     if (result == 0) {
         snackbarText.value = "You are no longer friends";

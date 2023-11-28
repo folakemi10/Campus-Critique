@@ -22,7 +22,7 @@
         <v-container class="my-5">
           <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
           <v-card v-for="friend in acceptedFriends" :key="friend.id"
-            :to="{ path: '/friendsProfile/', query: { friendId: friend.id, fromFriendsPage: 'fromAcceptedPage' } }" class="mb-1">
+            :to="{ path: '/friendsProfile/', query: { friendId: friend.id, friendRequestStatus: 'accepted' } }" class="mb-1">
             <v-card-text class="py-4">
               <h1>
                 {{ friend.username }}
@@ -159,11 +159,18 @@ watch(selected, () => {
 
 watch(friendObject, async () => {
   if (friendObject.value) {
+    const user_uid = userId.value as string;
+    const allFriendIds = await getAcceptedFriends(user_uid);
+    let accepted = "pending";
+    if(allFriendIds.includes(friendObject.value.uid)){
+    accepted = "accepted";
+    }
+
     await navigateTo({
       path: '/friendsProfile/',
       query: {
         friendId: friendObject.value.uid,
-        fromFriendsPage: "fromFriendsPage",
+        friendRequestStatus: accepted,
       },
       replace: true,
     });
@@ -197,7 +204,7 @@ const getFriends = async () => {
   if (userId) {
     const user_uid = userId.value as string;
     const allFriendIds = await getAcceptedFriends(user_uid);
-    console.log("all" + allFriendIds);
+    console.log("all1" + allFriendIds);
     const q = query(usersRef);
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
