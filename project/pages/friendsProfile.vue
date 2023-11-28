@@ -44,7 +44,7 @@
 
 
                             <v-card class="my-10 min-w-full max-w-xl">
-                                <v-card-item v-for="bookmark in userBookmarks" :key="bookmark.id"
+                                <v-card-item v-if="isFromAcceptedPage" v-for="bookmark in userBookmarks" :key="bookmark.id"
                                     @click="navigateToCourseProfile(bookmark.reviewedObjectId)">
                                     <v-card-title>
                                         {{ bookmark.reviewedObjectName }}
