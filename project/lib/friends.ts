@@ -63,8 +63,10 @@ export async function acceptFriendRequest(inv_id: string) {
     const invSnap = await getDoc(invDoc);
     const invData = invSnap.data();
 
+    console.log(invData);
+
     // update invitation
-    await updateDoc(invDoc, { status: "accepted "});
+    await updateDoc(invDoc, { status: "accepted"});
 }
 
 export async function declineFriendRequest(inv_id: string) {
@@ -113,6 +115,8 @@ export async function getAcceptedFriends(uid: string) {
             result.push(data.receiverId);
         }
     });
+
+    console.log(result);
 
     return result;
 }

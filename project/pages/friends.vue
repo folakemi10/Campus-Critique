@@ -147,6 +147,8 @@ async function loadContent() {
       ...doc.data(),
     }));
 
+    console.log(userId.value);
+    
     // Retrieve pending invitations where the user is the sender
     const invitationsQuery2 = query(
       invitationsRef,
@@ -174,7 +176,11 @@ watch(selected, () => {
 watch(friendObject, async () => {
   if (friendObject.value) {
     const user_uid = userId.value as string;
+    console.log(user_uid);
     const allFriendIds = await getAcceptedFriends(user_uid);
+
+    console.log(allFriendIds);
+
     let accepted = "pending";
     if (allFriendIds.includes(friendObject.value.uid)) {
       accepted = "accepted";
@@ -218,7 +224,7 @@ const getFriends = async () => {
   if (userId) {
     const user_uid = userId.value as string;
     const allFriendIds = await getAcceptedFriends(user_uid);
-    console.log("all1" + allFriendIds);
+    console.log(allFriendIds);
     const q = query(usersRef);
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
