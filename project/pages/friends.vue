@@ -1,76 +1,82 @@
 <template>
-  <v-card>
-    <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
-      <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
-        {{ item }}
-      </v-tab>
-    </v-tabs>
+  <div>
+    <div class="text-center" v-if="loading">
+      <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
+    </div>
 
-    <v-window v-model="tab" class="bg-black">
-      <v-window-item value="tab-0">
-        <v-container class="flex flex-col items-center justify-center">
+    <v-card v-if="authenticated && !loading">
+      <v-tabs v-if="firebaseUser" v-model="tab" align-tabs="start" color="primary">
+        <v-tab v-for="(item, index) in tabItems" :key="index" :value="'tab-' + index">
+          {{ item }}
+        </v-tab>
+      </v-tabs>
 
-          <v-card class="min-w-full max-w-xl ">
-            <v-card-text>
-              <v-autocomplete label="Search" placeholder="Search for a username" :items="userSuggestions"
-                v-model="selected" item-text="username" item-value="id" variant="outlined" return-object></v-autocomplete>
-            </v-card-text>
-          </v-card>
-        </v-container>
+      <v-window v-model="tab" class="bg-black">
+        <v-window-item value="tab-0">
+          <v-container class="flex flex-col items-center justify-center">
 
-
-        <v-container class="my-5">
-          <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
-          <v-card v-for="friend in acceptedFriends" :key="friend.id"
-            :to="{ path: '/friendsProfile/', query: { friendId: friend.id, friendRequestStatus: 'accepted' } }" class="mb-1">
-            <v-card-text class="py-4">
-              <h1>
-                {{ friend.username }}
-              </h1>
-            </v-card-text>
-            <v-divider></v-divider>
-          </v-card>
-        </v-container>
-      </v-window-item>
+            <v-card class="min-w-full max-w-xl ">
+              <v-card-text>
+                <v-autocomplete label="Search" placeholder="Search for a username" :items="userSuggestions"
+                  v-model="selected" item-text="username" item-value="id" variant="outlined"
+                  return-object></v-autocomplete>
+              </v-card-text>
+            </v-card>
+          </v-container>
 
 
-      <v-window-item value="tab-1">
-        <v-container fluid>
-          <Snackbar v-if="snackbar" :text = "snackbarText"/>
-          <h1 class="text-3xl font-semibold mb-4"> Your Invites </h1>
-          <v-card v-for="invitation in invitations" :key="invitation.id" class="mb-4">
-            <v-card-text>{{ invitation.senderName }} is trying to become your friend</v-card-text>
-            <v-card-actions>
-              <v-btn  text="Edit Profile" variant="outlined" @click="acceptInvitation(invitation)">Accept</v-btn>
-              <v-btn  text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">Decline</v-btn>
-            </v-card-actions>
-          </v-card>
+          <v-container class="my-5">
+            <h1 class="text-3xl font-semibold mb-4"> Your Friends </h1>
+            <v-card v-for="friend in acceptedFriends" :key="friend.id"
+              :to="{ path: '/friendsProfile/', query: { friendId: friend.id, friendRequestStatus: 'accepted' } }"
+              class="mb-1">
+              <v-card-text class="py-4">
+                <h1>
+                  {{ friend.username }}
+                </h1>
+              </v-card-text>
+              <v-divider></v-divider>
+            </v-card>
+          </v-container>
+        </v-window-item>
 
 
-        </v-container>
-
-      </v-window-item>
-
-      <v-window-item value="tab-2">
-        <v-container fluid>
-          <Snackbar v-if="snackbar" :text = "snackbarText"/>
-          <h1 class="text-3xl font-semibold mb-4"> Sent Invites </h1>
-          <v-card v-for="invitation in sentInvitations" :key="invitation.id" class="mb-4">
-            <v-card-text> You sent an invite to {{ invitation.receiverName }} </v-card-text>
-            <v-card-actions>
-              <v-btn  text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">withdraw</v-btn>
-            </v-card-actions>
-          </v-card>
+        <v-window-item value="tab-1">
+          <v-container fluid>
+            <Snackbar v-if="snackbar" :text="snackbarText" />
+            <h1 class="text-3xl font-semibold mb-4"> Your Invites </h1>
+            <v-card v-for="invitation in invitations" :key="invitation.id" class="mb-4">
+              <v-card-text>{{ invitation.senderName }} is trying to become your friend</v-card-text>
+              <v-card-actions>
+                <v-btn text="Edit Profile" variant="outlined" @click="acceptInvitation(invitation)">Accept</v-btn>
+                <v-btn text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">Decline</v-btn>
+              </v-card-actions>
+            </v-card>
 
 
-        </v-container>
+          </v-container>
 
-      </v-window-item>
+        </v-window-item>
 
-    </v-window>
+        <v-window-item value="tab-2">
+          <v-container fluid>
+            <Snackbar v-if="snackbar" :text="snackbarText" />
+            <h1 class="text-3xl font-semibold mb-4"> Sent Invites </h1>
+            <v-card v-for="invitation in sentInvitations" :key="invitation.id" class="mb-4">
+              <v-card-text> You sent an invite to {{ invitation.receiverName }} </v-card-text>
+              <v-card-actions>
+                <v-btn text="Edit Profile" variant="outlined" @click="declineInvitation(invitation)">withdraw</v-btn>
+              </v-card-actions>
+            </v-card>
 
 
-  </v-card>
+          </v-container>
+
+        </v-window-item>
+
+      </v-window>
+    </v-card>
+  </div>
 </template>
   
 <script setup lang="ts">
@@ -78,12 +84,9 @@ import { collection, updateDoc, deleteDoc, getDocs, query, where, doc, setDoc, g
 import { db } from '~/lib/firebase';
 import { ref } from 'vue';
 import { queryEntireCollection, getUser } from "~/lib/db";
-import { declineFriendRequest, acceptFriendRequest, getAcceptedFriends} from '~/lib/friends';
+import { declineFriendRequest, acceptFriendRequest, getAcceptedFriends } from '~/lib/friends';
 
-
-
-
-const firebaseUser = ref();
+const firebaseUser: any | null = ref(null);
 const userId = ref();
 
 const usersRef = collection(db, "users");
@@ -98,13 +101,15 @@ const snackbarText = ref();
 
 const authenticated = ref();
 
+const loading = ref(false);
+
 onMounted(async () => {
-    firebaseUser.value = useAttrs().user;
-    authenticated.value = useAttrs().isAuthenticated;
-    await loadContent();
-    if (!authenticated) {
-        navigateTo("/");
-    }
+  firebaseUser.value = useAttrs().user;
+  authenticated.value = useAttrs().isAuthenticated;
+  await loadContent();
+  if (!authenticated) {
+    navigateTo("/");
+  }
 });
 
 watch(firebaseUser, async () => {
@@ -113,16 +118,24 @@ watch(firebaseUser, async () => {
 
 //search bar for friends tab
 async function loadContent() {
-  if (firebaseUser.value != null) {
+  loading.value = true;
+  
+  if (!firebaseUser.value) {
+    authenticated.value = false;
+    console.log("No User");
+  }else {
     userId.value = firebaseUser.value?.uid;
     user.value = await getUser(userId.value);
+
     allUsers.value = await queryEntireCollection('users');
-    
+
     //remove the user from the list
     allUsers.value = allUsers.value.filter(user => user.uid !== userId.value);
 
     userSuggestions.value = allUsers.value.map(user => user.username);
-    
+
+    console.log(userId.value);
+
     const invitationsQuery1 = query(
       invitationsRef,
       where('receiverId', '==', userId.value),
@@ -145,10 +158,11 @@ async function loadContent() {
       id: doc.id,
       ...doc.data(),
     }));
+
+    authenticated.value = true;
+ 
   }
-  else {
-    console.log("No User");
-  }
+  loading.value = false;
 }
 
 
@@ -162,8 +176,8 @@ watch(friendObject, async () => {
     const user_uid = userId.value as string;
     const allFriendIds = await getAcceptedFriends(user_uid);
     let accepted = "pending";
-    if(allFriendIds.includes(friendObject.value.uid)){
-    accepted = "accepted";
+    if (allFriendIds.includes(friendObject.value.uid)) {
+      accepted = "accepted";
     }
 
     await navigateTo({
@@ -221,12 +235,12 @@ const getFriends = async () => {
 
 // Accept an invitation and update the friends list
 async function acceptInvitation(invitation: any) {
-  try {  
+  try {
     const user_uid = userId.value as string;
     await acceptFriendRequest(invitation.id)
     snackbarText.value = "Invite accepted";
     snackbar.value = true;
-    await getAcceptedFriends(user_uid );
+    await getAcceptedFriends(user_uid);
     invitations.value = invitations.value.filter((item) => item.id !== invitation.id);
   }
   catch (error) {

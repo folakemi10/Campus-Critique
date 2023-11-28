@@ -32,10 +32,11 @@
                 <Snackbar v-if="snackbar" :text="snackbarText" />
                 <v-window-item value="tab-0">
 
-
-                    <Card class="min-w-full max-w-xl" v-if="isFromAcceptedPage" v-for="(review, index) in friendPosts"
-                        :key="review.id" :review="review" :showChangeBtns="true">
-                    </Card>
+                    <v-container class="flex flex-col items-center justify-center">
+                        <Card class="min-w-full max-w-xl" v-if="isFromAcceptedPage" v-for="(review, index) in friendPosts"
+                            :key="review.id" :review="review" :showChangeBtns="false">
+                        </Card>
+                    </v-container>
 
                 </v-window-item>
                 <v-window-item value="tab-1">
@@ -83,7 +84,7 @@ const snackbarText = ref();
 
 const loading = ref(true);
 const authenticated = ref();
-const userBookmarks =  ref<any[]>([]);;
+const userBookmarks = ref<any[]>([]);;
 const props = defineProps({
     variant: {
         type: String as PropType<"outlined" | "flat" | "text" | "elevated" | "tonal" | "plain">,
@@ -188,13 +189,13 @@ async function getFriendProfilePic() {
 }
 
 async function navigateToCourseProfile(reviewedObjectId: any) {
-  await navigateTo({
-    path: '/details/',
-    query: {
-      id: reviewedObjectId,
-    },
-    replace: true,
-  })
+    await navigateTo({
+        path: '/details/',
+        query: {
+            id: reviewedObjectId,
+        },
+        replace: true,
+    })
 };
 
 
