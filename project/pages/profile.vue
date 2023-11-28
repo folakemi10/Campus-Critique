@@ -98,7 +98,8 @@ const authenticated = ref();
 const userDoc = ref();
 const editedUserDoc = ref();
 const dialog = ref(false);
-const userBookmarks = ref([]); 
+const userBookmarks = ref<any[]>([]);
+
 
 const rules = ref({
   required: (value: any) => !!value || "Cannot be empty",
@@ -156,7 +157,7 @@ async function loadContent() {
 const tab = ref('tab-0');
 
 const tabItems = computed(() => {
-  return ['Posts (' + allPosts.value.length + ")", 'Saved Courses'];
+  return ['Posts (' + allPosts.value.length + ")", 'Bookmarks'];
 });
 
 async function deletePost(id: string) {
@@ -218,7 +219,7 @@ const saveProfileChanges = async () => {
 
 const { profilePicUrl, updatePicture } = inject('picture') as any;
 
-async function navigateToCourseProfile(reviewedObjectId) {
+async function navigateToCourseProfile(reviewedObjectId: any) {
   await navigateTo({
     path: '/details/',
     query: {
