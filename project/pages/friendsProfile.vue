@@ -6,6 +6,7 @@
 
         <v-card v-if="!loading">
             <v-card class="min-w-full max-w-xl">
+                <v-card-text>
                 <div class="flex items-center">
                     <FriendAvatar class="mr-4" size="64" :user='friendName' />
                     <h1 class="text-3xl font-semibold mt-4 mb-4 pl-4 pr-4"> {{ friendName ? friendName.firstname :
@@ -14,7 +15,10 @@
                 <div class="text-lg mb-4">
                     {{ '@' + friendName ? friendName.username : 'Loading...' }}
                 </div>
+            </v-card-text>
                 <v-btn v-if="isFromFriendsPage" :variant="variant" class="mx-4 mb-4" @click="inviteFriend">Invite
+                    Friend</v-btn>
+                <v-btn v-if="!isFromFriendsPage" :variant="variant" class="mx-4 mb-4" @click="unFriendUser"> Remove
                     Friend</v-btn>
             </v-card>
 
@@ -49,7 +53,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from '~/lib/firebase';
 import { useRoute } from 'vue-router';
 import { getProfilePic } from '~/lib/storage';
-import { sendFriendRequest } from '~/lib/friends';
+import { sendFriendRequest, unFriend} from '~/lib/friends';
 
 
 
@@ -146,6 +150,23 @@ async function inviteFriend() {
         snackbar.value = true;
     }
 }
+
+async function unFriendUser() {
+    const send_uid = userId.value as string;
+    const recv_uid = friendId as string;
+
+
+    const result = await unFriend(send_uid, recv_uid);
+    if (result == 0) {
+        snackbarText.value = "You are no longer friends";
+        snackbar.value = true;
+    }
+    if (result == 3) {
+        snackbarText.value = "Error unfriending user";
+        snackbar.value = true;
+    }
+}
+
 
 async function getFriendProfilePic() {
     return await getProfilePic(friendId);
