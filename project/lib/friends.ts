@@ -121,12 +121,12 @@ export async function getFriendPosts(uid: string, from: string = "", obj_id: str
         let fltr : QueryCompositeFilterConstraint | QueryFieldFilterConstraint = where("uid",'==',f);
         if (from == "class") {
             fltr = and(
-                where("uid",'==',f), where("class",'==',obj_id)
+                where("uid",'==',f), where("class",'==',obj_id), where("reviewedObject","==", "course")
             );
         }   
         else if (from == "professor") {
             fltr = and(
-                where("uid",'==',f), where("professor",'==',obj_id)
+                where("uid",'==',f), where("professor",'==',obj_id), where("reviewedObject","==", "professor")
             );
         }
 

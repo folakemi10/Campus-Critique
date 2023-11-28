@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- If user is logged in, display all the posts for the class -->
-    <div class="text-center"  v-if="loading">
+    <div class="text-center" v-if="loading">
       <v-progress-circular model-value="20" color="primary" indeterminate></v-progress-circular>
     </div>
 
@@ -41,6 +41,8 @@ var isCourse = false;
 const authenticated = ref(false);
 const loading = ref(true);
 
+const unfilteredPosts = ref<any[]>([]);
+
 onMounted(async () => {
   await loadContent();
   if (!authenticated) {
@@ -64,14 +66,20 @@ async function loadContent() {
     const profDoc = await getDoc(profDocRef);
 
     const uid = firebaseUser.value.uid as string;
+
+
+    //console.log(uid);
     if (courseDoc.exists()) {
       // specificPosts.value = await queryCollectionByField('posts', 'class', reviewedObjectId);
       specificPosts.value = await getFriendPosts(uid, 'class', reviewedObjectId);
+      //console.log(specificPosts.value.filter(item => item.reviewedObject === "course"));
     }
     if (profDoc.exists()) {
       // specificPosts.value = await queryCollectionByField('posts', 'professor', reviewedObjectId);
       specificPosts.value = await getFriendPosts(uid, 'professor', reviewedObjectId);
+      //console.log(specificPosts.value.filter(item => item.reviewedObject === "professor"));
     }
+
 
     currentObjectName.value = await getObject(reviewedObjectId);
 

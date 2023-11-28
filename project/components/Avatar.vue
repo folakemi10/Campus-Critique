@@ -24,7 +24,7 @@ onMounted(async () => {
 })
 
 function getUserInitials() {
-    console.log(props.user);
+    //console.log(props.user);
     if (props.user?.firstname == null || props.user?.firstname == null) {
         return props.user?.email.charAt(0);
     } else {

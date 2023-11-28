@@ -1,85 +1,84 @@
 <template>
-    <v-form @submit.prevent="onSubmit" v-model="valid">
-        <v-card class="m-6">
-            <v-card-title>I want to rate a: </v-card-title>
-            <v-radio-group v-model="typeSelection" inline @input="onChange()">
-                <v-radio label="Course" value="course"></v-radio>
-                <v-radio label="Professor" value="professor"></v-radio>
-            </v-radio-group>
-        </v-card>
-
-        <div v-if="revealForm">
-            <!-- Course Selected -->
-            <v-card class="m-6" v-if="formType == 'course'">
-                <v-card-title> Which course are you reviewing? </v-card-title>
-                <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
-                    return-object></v-autocomplete>
-            </v-card>
-            <v-card class="m-6" v-if="formType == 'course'">
-                <v-card-title> Which professor taught this course? </v-card-title>
-                <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
-                    item-text="firstname" item-value="id" return-object></v-autocomplete>
-            </v-card>
-
-            <!-- Professor Selected -->
-            <v-card class="m-6" v-if="formType == 'professor'">
-                <v-card-title>Which professor are you reviewing? </v-card-title>
-                <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
-                    return-object></v-autocomplete>
-            </v-card>
-
-            <v-card class="m-6" v-if="formType == 'professor'">
-                <v-card-title>Which course did you take with this professor? </v-card-title>
-                <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
-                    return-object></v-autocomplete>
-            </v-card>
-
-
-
-
-
+    <v-container>
+        <v-form @submit.prevent="onSubmit" v-model="valid">
             <v-card class="m-6">
-                <v-rating hover v-model="review.rating"></v-rating>
+                <v-card-title>I want to rate a: </v-card-title>
+                <v-radio-group v-model="typeSelection" inline @input="onChange()">
+                    <v-radio label="Course" value="course"></v-radio>
+                    <v-radio label="Professor" value="professor"></v-radio>
+                </v-radio-group>
             </v-card>
 
+            <div v-if="revealForm">
+                <!-- Course Selected -->
+                <v-card class="m-6" v-if="formType == 'course'">
+                    <v-card-title> Which course are you reviewing? </v-card-title>
+                    <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+                        return-object></v-autocomplete>
+                </v-card>
+                <v-card class="m-6" v-if="formType == 'course'">
+                    <v-card-title> Which professor taught this course? </v-card-title>
+                    <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+                        item-text="firstname" item-value="id" return-object></v-autocomplete>
+                </v-card>
 
-            <v-card class="m-6">
-                <v-card-title>Write a Review: </v-card-title>
-                <v-container fluid>
-                    <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow
-                        v-model="review.textReview"></v-textarea>
-                </v-container>
-            </v-card>
+                <!-- Professor Selected -->
+                <v-card class="m-6" v-if="formType == 'professor'">
+                    <v-card-title>Which professor are you reviewing? </v-card-title>
+                    <v-autocomplete label="Professors" v-model="selectedProf" :rules="rules.required" :items="allProfessors"
+                        return-object></v-autocomplete>
+                </v-card>
 
-            <v-card class="m-6">
-                <v-card-title>Add Attachments: </v-card-title>
-                <v-card-subtitle>Any files attached to this review can be viewed by all your friends.</v-card-subtitle>
+                <v-card class="m-6" v-if="formType == 'professor'">
+                    <v-card-title>Which course did you take with this professor? </v-card-title>
+                    <v-autocomplete label="Courses" v-model="selectedClass" :rules="rules.required" :items="allCourses"
+                        return-object></v-autocomplete>
+                </v-card>
 
-                <v-card-actions>
-                    <v-file-input v-model="selectedFiles" color="primary" label="Upload Files"
-                        placeholder="Select your files" prepend-icon="mdi-paperclip" variant="outlined" @change="addFiles" multiple clearable>
-                    </v-file-input>
 
-                    <!-- <v-btn @click="addFiles">
-                        Add Files
-                    </v-btn> -->
-                </v-card-actions>
-                <v-card-item>
-                    <v-chip-group>
-                        <FileChip v-for="(file, index) in allFiles" :key="index" :icon="`mdi-close-circle-outline`"
-                            :fileName="file.name" @click="removeFile(index)" />
-                    </v-chip-group>
-                </v-card-item>
+                <v-card class="m-6">
+                    <v-rating hover v-model="review.rating" :rules="rules.required"></v-rating>
+                </v-card>
 
-                <v-container fluid>
 
-                </v-container>
-            </v-card>
+                <v-card class="m-6">
+                    <v-card-title>Write a Review: </v-card-title>
+                    <v-container fluid>
+                        <v-textarea name="input-7-1" variant="filled" label="Write your review" auto-grow
+                            v-model="review.textReview" :rules="rules.required"></v-textarea>
+                    </v-container>
+                </v-card>
 
-            <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+                <v-card class="m-6">
+                    <v-card-title>Add Attachments: </v-card-title>
+                    <v-card-subtitle>Any files attached to this review can be viewed by all your friends.</v-card-subtitle>
 
-        </div>
-    </v-form>
+                    <v-card-actions>
+                        <v-file-input v-model="selectedFiles" color="primary" label="Upload Files"
+                            placeholder="Select your files" prepend-icon="mdi-paperclip" variant="outlined"
+                            @change="addFiles" multiple clearable>
+                        </v-file-input>
+
+                        <!-- <v-btn @click="addFiles">
+                            Add Files
+                        </v-btn> -->
+                    </v-card-actions>
+                    <v-card-item>
+                        <v-chip-group>
+                            <FileChip v-for="(file, index) in allFiles" :key="index" :icon="`mdi-close-circle-outline`"
+                                :fileName="file.name" @click="removeFile(index)" />
+                        </v-chip-group>
+                    </v-card-item>
+
+                    <v-container fluid>
+
+                    </v-container>
+                </v-card>
+
+                <v-btn type="submit" block class="mt-2" text="Submit"></v-btn>
+            </div>
+        </v-form>
+    </v-container>
 </template>
 
 <script setup lang="ts">
@@ -223,7 +222,7 @@ async function onSubmit() {
 
     //if valid is true (meaning all the required questions of the form were filled out)
     if (valid.value) {
-        console.log(review.value);
+        //console.log(review.value);
         try {
             //add the post to the posts collection and return the document id
             const docId = await addPost();
