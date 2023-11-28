@@ -157,7 +157,7 @@ async function loadContent() {
 const tab = ref('tab-0');
 
 const tabItems = computed(() => {
-  return ['Posts (' + allPosts.value.length + ")", 'Saved Courses'];
+  return ['Posts (' + allPosts.value.length + ")", 'Bookmarks'];
 });
 
 async function deletePost(id: string) {
