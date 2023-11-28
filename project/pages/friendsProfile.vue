@@ -158,8 +158,12 @@ async function inviteFriend() {
         snackbarText.value = "Invitation sent!";
         snackbar.value = true;
     }
-    if (result == 3) {
+    else if (result == 3) {
         snackbarText.value = "An invitation for this friend already exists";
+        snackbar.value = true;
+    }
+    else {
+        snackbarText.value = "Your invitation was not sent";
         snackbar.value = true;
     }
 }
