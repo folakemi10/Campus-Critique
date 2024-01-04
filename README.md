@@ -1,4 +1,6 @@
 # cse437
+## Website Link
+https://campuscritique.vercel.app/
 
 ## Dev Instructions
 1. Clone The Repo
